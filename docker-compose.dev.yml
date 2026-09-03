@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tagira-postgres-dev
+    environment:
+      POSTGRES_USER: tagira
+      POSTGRES_PASSWORD: tagira_dev
+      POSTGRES_DB: tagira
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tagira -d tagira"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: tagira-api-dev
+    environment:
+      APP_ENV: development
+      APP_PORT: 8080
+      APP_HOST: 0.0.0.0
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: tagira
+      DB_PASSWORD: tagira_dev
+      DB_NAME: tagira
+      DB_SSL_MODE: disable
+      DB_MAX_OPEN_CONNS: 10
+      DB_MAX_IDLE_CONNS: 5
+      DB_CONN_MAX_LIFETIME: 300
+      SESSION_SECRET: change_me_32_chars_minimum_length
+      JWT_SECRET: change_me_32_chars_minimum_length_for_jwt
+      JWT_EXPIRE_HOURS: 24
+      SERVICE_TOKEN: hermes_service_token_change_me
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      CORS_ALLOW_CREDENTIALS: "true"
+      RATE_LIMIT_REQUESTS: 100
+      RATE_LIMIT_WINDOW_SECONDS: 60
+      LOG_FORMAT: console
+      LOG_LEVEL: debug
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: air -c .air.toml
+
+volumes:
+  postgres_dev_data:

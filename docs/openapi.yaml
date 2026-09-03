@@ -1,0 +1,979 @@
+openapi: 3.0.3
+info:
+  title: Tagira API
+  description: Agent Penagihan & Follow-up Invoice Otomatis untuk UMKM
+  version: 1.0.0
+  contact:
+    name: Tagira Team
+    email: support@tagira.example
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://api.tagira.example/api/v1
+    description: Production server
+
+security:
+  - SessionAuth: []
+  - ServiceTokenAuth: []
+
+tags:
+  - name: auth
+    description: Authentication endpoints
+  - name: customers
+    description: Customer management
+  - name: invoices
+    description: Invoice management
+  - name: follow-up-logs
+    description: Follow-up log management
+  - name: summary
+    description: Daily summary reports
+
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Login owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Get current user info
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /customers:
+    get:
+      tags: [customers]
+      summary: List customers with pagination
+      security:
+        - SessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/SortBy'
+        - $ref: '#/components/parameters/SortDir'
+        - name: nama
+          in: query
+          schema:
+            type: string
+          description: Filter by customer name (partial match)
+      responses:
+        '200':
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerListResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags: [customers]
+      summary: Create new customer
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomerRequest'
+      responses:
+        '201':
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /customers/{id}:
+    get:
+      tags: [customers]
+      summary: Get customer by ID
+      security:
+        - SessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+      responses:
+        '200':
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      tags: [customers]
+      summary: Update customer
+      security:
+        - SessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerRequest'
+      responses:
+        '200':
+          description: Customer updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [customers]
+      summary: Delete customer
+      security:
+        - SessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CustomerId'
+      responses:
+        '204':
+          description: Customer deleted
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /invoices:
+    get:
+      tags: [invoices]
+      summary: List invoices with pagination and filters
+      security:
+        - SessionAuth: []
+        - ServiceTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/SortBy'
+        - $ref: '#/components/parameters/SortDir'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [belum_bayar, lunas, terlambat]
+          description: Filter by invoice status
+        - name: customer_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter by customer ID
+      responses:
+        '200':
+          description: List of invoices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceListResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags: [invoices]
+      summary: Create new invoice
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceRequest'
+      responses:
+        '201':
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /invoices/due-today:
+    get:
+      tags: [invoices]
+      summary: Get invoices due today or overdue (for Hermes)
+      security:
+        - SessionAuth: []
+        - ServiceTokenAuth: []
+      responses:
+        '200':
+          description: List of due invoices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InvoiceResponse'
+                  error:
+                    type: object
+                    nullable: true
+                  meta:
+                    type: object
+                    nullable: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /invoices/{id}:
+    get:
+      tags: [invoices]
+      summary: Get invoice by ID
+      security:
+        - SessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/InvoiceId'
+      responses:
+        '200':
+          description: Invoice found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /invoices/{id}/status:
+    patch:
+      tags: [invoices]
+      summary: Update invoice status
+      security:
+        - SessionAuth: []
+      parameters:
+        - $ref: '#/components/parameters/InvoiceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateInvoiceStatusRequest'
+      responses:
+        '200':
+          description: Invoice status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /follow-up-logs:
+    get:
+      tags: [follow-up-logs]
+      summary: List follow-up logs with pagination and filters
+      security:
+        - SessionAuth: []
+        - ServiceTokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/SortBy'
+        - $ref: '#/components/parameters/SortDir'
+        - name: invoice_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter by invoice ID
+        - name: sumber
+          in: query
+          schema:
+            type: string
+            enum: [manual, hermes]
+          description: Filter by source
+      responses:
+        '200':
+          description: List of follow-up logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUpLogListResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags: [follow-up-logs]
+      summary: Create follow-up log (manual or hermes)
+      security:
+        - SessionAuth: []
+        - ServiceTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFollowUpLogRequest'
+      responses:
+        '201':
+          description: Follow-up log created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUpLogResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /follow-up-logs/invoice/{invoice_id}:
+    get:
+      tags: [follow-up-logs]
+      summary: Get follow-up logs for specific invoice
+      security:
+        - SessionAuth: []
+        - ServiceTokenAuth: []
+      parameters:
+        - name: invoice_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Invoice ID
+      responses:
+        '200':
+          description: List of follow-up logs for invoice
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FollowUpLogResponse'
+                  error:
+                    type: object
+                    nullable: true
+                  meta:
+                    type: object
+                    nullable: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /summary/daily:
+    get:
+      tags: [summary]
+      summary: Get daily summary report
+      security:
+        - SessionAuth: []
+        - ServiceTokenAuth: []
+      responses:
+        '200':
+          description: Daily summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailySummaryResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: cookie
+      name: session_token
+      description: JWT session cookie (HttpOnly)
+    ServiceTokenAuth:
+      type: apiKey
+      in: header
+      name: X-Service-Token
+      description: Service token for Hermes agent
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number
+    PageSize:
+      name: page_size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Items per page
+    SortBy:
+      name: sort_by
+      in: query
+      schema:
+        type: string
+      description: Field to sort by
+    SortDir:
+      name: sort_dir
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+      description: Sort direction
+    CustomerId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Customer ID
+    InvoiceId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Invoice ID
+
+  schemas:
+    # Common
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          $ref: '#/components/schemas/APIError'
+        data:
+          type: object
+          nullable: true
+        meta:
+          type: object
+          nullable: true
+
+    APIError:
+      type: object
+      properties:
+        code:
+          type: string
+          enum: [VALIDATION_ERROR, NOT_FOUND, UNAUTHORIZED, FORBIDDEN, CONFLICT, INTERNAL_ERROR, RATE_LIMIT_EXCEEDED]
+        message:
+          type: string
+        details:
+          type: object
+
+    Meta:
+      type: object
+      properties:
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_items:
+          type: integer
+        total_pages:
+          type: integer
+
+    # Auth
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 6
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/UserWithToken'
+        error:
+          type: object
+          nullable: true
+        meta:
+          type: object
+          nullable: true
+
+    UserWithToken:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserResponse'
+        token:
+          type: string
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        created_at:
+          type: string
+          format: date-time
+
+    MeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            user_id:
+              type: string
+            email:
+              type: string
+            auth_mode:
+              type: string
+              enum: [session, service_token]
+        error:
+          type: object
+          nullable: true
+        meta:
+          type: object
+          nullable: true
+
+    # Customer
+    CreateCustomerRequest:
+      type: object
+      required: [nama]
+      properties:
+        nama:
+          type: string
+          minLength: 1
+          maxLength: 255
+        kontak_telegram:
+          type: string
+          maxLength: 255
+        catatan_perilaku_bayar:
+          type: string
+
+    UpdateCustomerRequest:
+      type: object
+      properties:
+        nama:
+          type: string
+          minLength: 1
+          maxLength: 255
+        kontak_telegram:
+          type: string
+          maxLength: 255
+        catatan_perilaku_bayar:
+          type: string
+
+    CustomerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nama:
+          type: string
+        kontak_telegram:
+          type: string
+        catatan_perilaku_bayar:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CustomerListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/CustomerListData'
+        error:
+          type: object
+          nullable: true
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    CustomerListData:
+      type: object
+      properties:
+        customers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerResponse'
+
+    # Invoice
+    CreateInvoiceRequest:
+      type: object
+      required: [customer_id, jumlah, tanggal_terbit, jatuh_tempo]
+      properties:
+        customer_id:
+          type: string
+          format: uuid
+        jumlah:
+          type: integer
+          minimum: 1
+          description: Amount in smallest currency unit (rupiah)
+        tanggal_terbit:
+          type: string
+          format: date
+          description: Issue date (YYYY-MM-DD)
+        jatuh_tempo:
+          type: string
+          format: date
+          description: Due date (YYYY-MM-DD)
+
+    UpdateInvoiceStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [belum_bayar, lunas, terlambat]
+
+    InvoiceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        customer_id:
+          type: string
+          format: uuid
+        customer_name:
+          type: string
+        jumlah:
+          type: integer
+        tanggal_terbit:
+          type: string
+          format: date
+        jatuh_tempo:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [belum_bayar, lunas, terlambat]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    InvoiceListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/InvoiceListData'
+        error:
+          type: object
+          nullable: true
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    InvoiceListData:
+      type: object
+      properties:
+        invoices:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceResponse'
+
+    # Follow-up Log
+    CreateFollowUpLogRequest:
+      type: object
+      required: [invoice_id, isi_pesan, sumber]
+      properties:
+        invoice_id:
+          type: string
+          format: uuid
+        isi_pesan:
+          type: string
+          minLength: 1
+        sumber:
+          type: string
+          enum: [manual, hermes]
+        respon_customer:
+          type: string
+
+    FollowUpLogResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        invoice_id:
+          type: string
+          format: uuid
+        invoice_customer:
+          type: string
+        tanggal_kirim:
+          type: string
+          format: date-time
+        isi_pesan:
+          type: string
+        sumber:
+          type: string
+          enum: [manual, hermes]
+        respon_customer:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    FollowUpLogListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/FollowUpLogListData'
+        error:
+          type: object
+          nullable: true
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    FollowUpLogListData:
+      type: object
+      properties:
+        logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/FollowUpLogResponse'
+
+    # Summary
+    DailySummaryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/DailySummaryData'
+        error:
+          type: object
+          nullable: true
+        meta:
+          type: object
+          nullable: true
+
+    DailySummaryData:
+      type: object
+      properties:
+        tertangih:
+          type: integer
+          description: Invoices with follow-up today
+        belum_tagih:
+          type: integer
+          description: Invoices due/overdue without follow-up today
+        terlambat:
+          type: integer
+          description: Invoices with status terlambat
+        lunas:
+          type: integer
+          description: Invoices with status lunas
+        total_jumlah:
+          type: integer
+          description: Total amount of all invoices
+        total_belum:
+          type: integer
+          description: Total amount of unpaid invoices
+        total_terlambat:
+          type: integer
+          description: Total amount of overdue invoices

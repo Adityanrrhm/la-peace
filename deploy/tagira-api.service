@@ -1,0 +1,34 @@
+[Unit]
+Description=Tagira API Server
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=tagira
+Group=tagira
+WorkingDirectory=/opt/tagira
+ExecStart=/opt/tagira/tagira-api
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=tagira-api
+
+# Environment
+EnvironmentFile=/opt/tagira/.env
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/tagira
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=1G
+CPUQuota=200%
+
+[Install]
+WantedBy=multi-user.target

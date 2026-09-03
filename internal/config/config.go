@@ -71,6 +71,10 @@ func Load() *Config {
 	}
 	cfg.WIBLocation = loc
 
+	if err := Validate(cfg); err != nil {
+		log.Fatal().Err(err).Msg("Configuration validation failed")
+	}
+
 	return cfg
 }
 

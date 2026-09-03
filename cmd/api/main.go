@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,7 +16,18 @@ import (
 )
 
 func main() {
+	// CLI flags
+	migrateFlag := flag.Bool("migrate", false, "Run database migrations")
+	migrateDownFlag := flag.Int("migrate-down", 0, "Rollback migrations (specify steps)")
+	validateFlag := flag.Bool("validate", false, "Validate configuration and exit")
+	flag.Parse()
+
 	cfg := config.Load()
+
+	if *validateFlag {
+		log.Info().Msg("Configuration validation passed")
+		return
+	}
 
 	pool, err := database.NewPool(cfg)
 	if err != nil {
@@ -23,6 +35,24 @@ func main() {
 	}
 	defer pool.Close()
 
+	// Handle migration commands
+	if *migrateFlag {
+		if err := database.Migrate(pool, "migrations"); err != nil {
+			log.Fatal().Err(err).Msg("Failed to run migrations")
+		}
+		log.Info().Msg("Migrations completed successfully")
+		return
+	}
+
+	if *migrateDownFlag > 0 {
+		if err := database.MigrateDown(pool, "migrations", *migrateDownFlag); err != nil {
+			log.Fatal().Err(err).Msg("Failed to rollback migrations")
+		}
+		log.Info().Int("steps", *migrateDownFlag).Msg("Migrations rolled back successfully")
+		return
+	}
+
+	// Run server
 	if err := database.Migrate(pool, "migrations"); err != nil {
 		log.Fatal().Err(err).Msg("Failed to run migrations")
 	}
