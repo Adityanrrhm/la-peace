@@ -9,7 +9,9 @@ import (
 	"tagira/internal/middleware"
 	"tagira/internal/modules/auth"
 	"tagira/internal/modules/customer"
+	"tagira/internal/modules/followup"
 	"tagira/internal/modules/invoice"
+	"tagira/internal/modules/summary"
 )
 
 type Server struct {
@@ -72,6 +74,18 @@ func (s *Server) registerRoutes() {
 	invoiceSvc := invoice.NewInvoiceService(invoiceRepo)
 	invoiceHandler := invoice.NewInvoiceHandler(invoiceSvc)
 	invoice.RegisterRoutes(api, invoiceHandler, s.cfg)
+
+	// Follow-up Log module
+	followupRepo := followup.NewFollowUpLogRepository(s.pool)
+	followupSvc := followup.NewFollowUpLogService(followupRepo)
+	followupHandler := followup.NewFollowUpLogHandler(followupSvc)
+	followup.RegisterRoutes(api, followupHandler, s.cfg)
+
+	// Summary module
+	summaryRepo := summary.NewSummaryRepository(s.pool)
+	summarySvc := summary.NewSummaryService(summaryRepo)
+	summaryHandler := summary.NewSummaryHandler(summarySvc)
+	summary.RegisterRoutes(api, summaryHandler, s.cfg)
 }
 
 func (s *Server) Engine() *gin.Engine {
