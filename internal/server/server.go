@@ -8,6 +8,8 @@ import (
 	"tagira/internal/database"
 	"tagira/internal/middleware"
 	"tagira/internal/modules/auth"
+	"tagira/internal/modules/customer"
+	"tagira/internal/modules/invoice"
 )
 
 type Server struct {
@@ -58,6 +60,18 @@ func (s *Server) registerRoutes() {
 	authSvc := auth.NewAuthService(authRepo, s.cfg)
 	authHandler := auth.NewAuthHandler(authSvc, s.cfg)
 	auth.RegisterRoutes(api, authHandler, s.cfg)
+
+	// Customer module
+	customerRepo := customer.NewCustomerRepository(s.pool)
+	customerSvc := customer.NewCustomerService(customerRepo)
+	customerHandler := customer.NewCustomerHandler(customerSvc)
+	customer.RegisterRoutes(api, customerHandler, s.cfg)
+
+	// Invoice module
+	invoiceRepo := invoice.NewInvoiceRepository(s.pool)
+	invoiceSvc := invoice.NewInvoiceService(invoiceRepo)
+	invoiceHandler := invoice.NewInvoiceHandler(invoiceSvc)
+	invoice.RegisterRoutes(api, invoiceHandler, s.cfg)
 }
 
 func (s *Server) Engine() *gin.Engine {
