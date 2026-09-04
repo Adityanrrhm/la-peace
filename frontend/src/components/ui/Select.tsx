@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, type SelectHTMLAttributes } from 'react';
+import { forwardRef, type SelectHTMLAttributes, type OptionHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(
@@ -27,3 +27,18 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
   }
 );
 Select.displayName = 'Select';
+
+export const SelectItem = forwardRef<HTMLOptionElement, OptionHTMLAttributes<HTMLOptionElement>>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <option
+        className={className}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </option>
+    );
+  }
+);
+SelectItem.displayName = 'SelectItem';

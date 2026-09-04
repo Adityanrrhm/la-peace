@@ -136,14 +136,14 @@ export function useInvoices(params?: { page?: number; page_size?: number; status
   });
 }
 
-export function useInvoice(id: string) {
+export function useInvoice(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKeys.invoices.detail(id),
     queryFn: async () => {
       const response = await api.get<{ success: boolean; data: Invoice }>(`/invoices/${id}`);
       return response.data.data;
     },
-    enabled: !!id,
+    enabled: options?.enabled ?? !!id,
   });
 }
 
