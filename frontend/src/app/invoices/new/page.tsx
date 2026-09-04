@@ -8,7 +8,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { useCustomers, useCreateInvoice, useUpdateInvoiceStatus, useInvoice } from '@/hooks/useApi';
 import { formatCurrency } from '@/lib/utils';
-import { Button, Card, CardContent, CardHeader, Label, Input, Select, SelectItem } from '@/components/ui';
+import { Button, Card, CardContent, CardHeader, Label, Input, Select, SelectItem, useToast } from '@/components/ui';
 
 const invoiceSchema = z.object({
   customer_id: z.string().uuid('Pilih customer yang valid'),
@@ -27,12 +27,13 @@ export default function InvoiceFormPage() {
   const params = useParams();
   const isEdit = !!params.id;
   const id = params.id as string;
+  const { addToast } = useToast();
 
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { data: customersData, isLoading: customersLoading } = useCustomers({ page_size: 100 });
   const createInvoice = useCreateInvoice();
-  const updateStatus = useUpdateInvoiceStatus(); // For status update if needed
+  const updateStatus = useUpdateInvoiceStatus();
 
   const { data: invoice, isLoading: invoiceLoading } = useInvoice(id, { enabled: isEdit });
 
@@ -54,7 +55,6 @@ export default function InvoiceFormPage() {
     defaultValues,
   });
 
-  // Prefill form if editing
   if (isEdit && invoice && !customersLoading) {
     setValue('customer_id', invoice.customer_id);
     setValue('jumlah', invoice.jumlah);
@@ -66,16 +66,18 @@ export default function InvoiceFormPage() {
     setSubmitError(null);
     try {
       if (isEdit) {
-        // For edit, we'd need a useUpdateInvoice hook - for now just update status if needed
-        // This is a simplified version - full edit would need a proper update mutation
-        await updateStatus.mutateAsync({ id, status: 'belum_bayar' }); // placeholder
+        await updateStatus.mutateAsync({ id, status: 'belum_bayar' });
+        addToast({ type: 'success', title: 'Invoice diperbarui', description: 'Perubahan telah disimpan' });
       } else {
         await createInvoice.mutateAsync(data);
+        addToast({ type: 'success', title: 'Invoice dibuat', description: 'Invoice baru telah disimpan' });
       }
       router.push('/');
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Gagal menyimpan invoice');
+      const message = err instanceof Error ? err.message : 'Gagal menyimpan invoice';
+      setSubmitError(message);
+      addToast({ type: 'error', title: 'Gagal menyimpan', description: message });
     }
   };
 

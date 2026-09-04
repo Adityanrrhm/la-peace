@@ -8,7 +8,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { useCustomer } from '@/hooks/useApi';
 import { formatCurrency } from '@/lib/utils';
-import { Button, Card, CardContent, CardHeader, Label, Input, Stempel } from '@/components/ui';
+import { Button, Card, CardContent, CardHeader, Label, Input, Stempel, useToast } from '@/components/ui';
 
 const customerSchema = z.object({
   nama: z.string().min(1, 'Nama harus diisi').max(255, 'Nama maksimal 255 karakter'),
@@ -25,6 +25,7 @@ export default function CustomerDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { addToast } = useToast();
 
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -45,7 +46,6 @@ export default function CustomerDetailPage() {
     },
   });
 
-  // Prefill form when customer data loads
   if (customer && !customerLoading) {
     setValue('nama', customer.nama, { shouldValidate: true });
     setValue('kontak_telegram', customer.kontak_telegram || '', { shouldValidate: true });
@@ -68,10 +68,13 @@ export default function CustomerDetailPage() {
       }
 
       await refetch();
+      addToast({ type: 'success', title: 'Customer diperbarui', description: 'Perubahan telah disimpan' });
       router.push('/customers');
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Gagal mengupdate customer');
+      const message = err instanceof Error ? err.message : 'Gagal mengupdate customer';
+      setSubmitError(message);
+      addToast({ type: 'error', title: 'Gagal mengupdate', description: message });
     }
   };
 

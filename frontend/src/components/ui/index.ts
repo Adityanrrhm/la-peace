@@ -7,3 +7,4 @@ export { Select, SelectItem } from './Select';
 export { Textarea } from './Textarea';
 export { ConfirmDialog } from './ConfirmDialog';
 export { TableHeader } from './TableHeader';
+export { ToastProvider, useToast } from './Toast';

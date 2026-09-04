@@ -8,7 +8,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { useInvoice, useUpdateInvoiceStatus, useFollowUpLogsByInvoice, useCreateFollowUpLog } from '@/hooks/useApi';
 import { formatCurrency, formatDateShort, getStatusLabel, getStatusColor } from '@/lib/utils';
-import { Button, Card, CardContent, CardHeader, Label, Stempel, Textarea, ConfirmDialog } from '@/components/ui';
+import { Button, Card, CardContent, CardHeader, Label, Stempel, Textarea, ConfirmDialog, useToast } from '@/components/ui';
 
 const followUpSchema = z.object({
   isi_pesan: z.string().min(1, 'Isi pesan harus diisi').max(1000, 'Maksimal 1000 karakter'),
@@ -20,6 +20,7 @@ export default function InvoiceDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
+  const { addToast } = useToast();
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [followUpError, setFollowUpError] = useState<string | null>(null);
@@ -44,8 +45,10 @@ export default function InvoiceDetailPage() {
       setShowConfirm(false);
       await refetchInvoice();
       await refetchLogs();
+      addToast({ type: 'success', title: 'Invoice ditandai lunas', description: 'Status telah diperbarui' });
     } catch (err) {
-      // Error handled by mutation
+      const message = err instanceof Error ? err.message : 'Gagal mengupdate status';
+      addToast({ type: 'error', title: 'Gagal mengupdate', description: message });
     }
   };
 
@@ -59,8 +62,11 @@ export default function InvoiceDetailPage() {
       });
       reset();
       await refetchLogs();
+      addToast({ type: 'success', title: 'Catatan ditambahkan', description: 'Follow-up manual telah disimpan' });
     } catch (err) {
-      setFollowUpError(err instanceof Error ? err.message : 'Gagal menambahkan catatan follow-up');
+      const message = err instanceof Error ? err.message : 'Gagal menambahkan catatan follow-up';
+      setFollowUpError(message);
+      addToast({ type: 'error', title: 'Gagal menyimpan', description: message });
     }
   };
 
