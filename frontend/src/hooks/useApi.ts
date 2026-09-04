@@ -27,7 +27,7 @@ export const queryKeys = {
     detail: (id: string) => ['customers', 'detail', id] as const,
   },
   invoices: {
-    list: (params?: { page?: number; page_size?: number; status?: string; customer_id?: string }) =>
+    list: (params?: { page?: number; page_size?: number; status?: string; customer_id?: string; sort_by?: string; sort_dir?: string }) =>
       ['invoices', 'list', params] as const,
     detail: (id: string) => ['invoices', 'detail', id] as const,
     dueToday: ['invoices', 'due-today'] as const,
@@ -126,7 +126,7 @@ export function useDeleteCustomer() {
 }
 
 // Invoice hooks
-export function useInvoices(params?: { page?: number; page_size?: number; status?: string; customer_id?: string }) {
+export function useInvoices(params?: { page?: number; page_size?: number; status?: string; customer_id?: string; sort_by?: string; sort_dir?: string }) {
   return useQuery({
     queryKey: queryKeys.invoices.list(params),
     queryFn: async () => {

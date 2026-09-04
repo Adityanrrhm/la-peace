@@ -1,24 +1,87 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { Button, Card, CardContent, CardHeader, Label, Stempel } from '@/components/ui';
-import { formatCurrency, formatDateShort, getStatusLabel, getStatusColor, getDaysUntilDue } from '@/lib/utils';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useCallback } from 'react';
+import { Button, Card, CardContent, CardHeader, Label, Stempel, Select, TableHeader } from '@/components/ui';
+import { formatCurrency, formatDateShort, getStatusLabel, getStatusColor } from '@/lib/utils';
 import Link from 'next/link';
 import { useInvoices, useDailySummary } from '@/hooks/useApi';
+import type { SortDirection } from '@/types/api';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
-  const { data: invoicesData, isLoading: invoicesLoading } = useInvoices({ page: 1, page_size: 10 });
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Parse URL params
+  const status = searchParams.get('status') || '';
+  const sortBy = searchParams.get('sort_by') || '';
+  const sortDir = (searchParams.get('sort_dir') as SortDirection) || 'desc';
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const pageSize = parseInt(searchParams.get('page_size') || '20', 10);
+
+  const { data: invoicesData, isLoading: invoicesLoading } = useInvoices({
+    page,
+    page_size: pageSize,
+    status: status || undefined,
+    sort_by: sortBy || undefined,
+    sort_dir: sortDir,
+  });
   const { data: summary, isLoading: summaryLoading } = useDailySummary();
 
   const invoices = invoicesData?.data?.invoices ?? [];
   const totalPages = invoicesData?.meta?.total_pages ?? 1;
   const currentPage = invoicesData?.meta?.page ?? 1;
+  const totalItems = invoicesData?.meta?.total_items ?? 0;
 
   const statusCounts = invoices.reduce((acc, inv) => {
     acc[inv.status] = (acc[inv.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  // URL sync helpers
+  const updateFilters = useCallback((newParams: Record<string, string | number | undefined>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(newParams).forEach(([k, v]) => {
+      if (v === undefined || v === '' || v === null) {
+        params.delete(k);
+      } else {
+        params.set(k, String(v));
+      }
+    });
+    // Reset to page 1 when filters change (except explicit page change)
+    if (newParams.page === undefined) {
+      params.set('page', '1');
+    }
+    router.push(`/?${params.toString()}`, { scroll: false });
+  }, [searchParams, router]);
+
+  const handleSort = useCallback((field: string) => {
+    if (sortBy === field) {
+      updateFilters({ sort_dir: sortDir === 'asc' ? 'desc' : 'asc' });
+    } else {
+      updateFilters({ sort_by: field, sort_dir: 'desc' });
+    }
+  }, [sortBy, sortDir, updateFilters]);
+
+  const handlePageChange = useCallback((newPage: number) => {
+    updateFilters({ page: newPage });
+  }, [updateFilters]);
+
+  const handlePageSizeChange = useCallback((newSize: number) => {
+    updateFilters({ page_size: newSize, page: 1 });
+  }, [updateFilters]);
+
+  const handleStatusChange = useCallback((newStatus: string) => {
+    updateFilters({ status: newStatus });
+  }, [updateFilters]);
+
+  const handleResetFilters = useCallback(() => {
+    router.push('/', { scroll: false });
+  }, [router]);
+
+  const hasActiveFilters = status || sortBy || pageSize !== 20;
 
   return (
     <div className="min-h-screen bg-bg-base">
@@ -70,7 +133,7 @@ export default function DashboardPage() {
 
               {/* Garis Perforasi - skeuomorphic accent */}
               <div className="my-4 border-t border-dashed border-border-hairline" aria-hidden="true" />
-              
+
               {/* Status counts row */}
               <div className="flex flex-wrap gap-4 text-sm text-ink/70">
                 <span className="font-medium">Terlambat: <span className="text-status-overdue font-semibold">{statusCounts.terlambat ?? 0}</span></span>
@@ -83,11 +146,41 @@ export default function DashboardPage() {
 
         {/* Daftar Invoice */}
         <section aria-labelledby="daftar-invoice-heading">
-          <div className="flex items-center justify-between mb-4">
-            <h2 id="daftar-invoice-heading" className="font-serif text-lg font-semibold text-ink">Daftar Invoice</h2>
-            <Link href="/invoices/new">
-              <Button size="sm">+ Tambah Invoice</Button>
-            </Link>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div className="flex items-center gap-4">
+              <h2 id="daftar-invoice-heading" className="font-serif text-lg font-semibold text-ink">Daftar Invoice</h2>
+              {hasActiveFilters && (
+                <Button variant="ghost" size="sm" onClick={handleResetFilters}>
+                  Reset filter
+                </Button>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link href="/invoices/new">
+                <Button size="sm">+ Tambah Invoice</Button>
+              </Link>
+              <Select
+                value={status}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                className="w-auto min-w-[160px]"
+                aria-label="Filter status"
+              >
+                <option value="">Semua Status</option>
+                <option value="belum_bayar">Belum Bayar</option>
+                <option value="lunas">Lunas</option>
+                <option value="terlambat">Terlambat</option>
+              </Select>
+              <Select
+                value={pageSize}
+                onChange={(e) => handlePageSizeChange(parseInt(e.target.value, 10))}
+                className="w-auto min-w-[100px]"
+                aria-label="Item per halaman"
+              >
+                <option value={10}>10 per halaman</option>
+                <option value={20}>20 per halaman</option>
+                <option value={50}>50 per halaman</option>
+              </Select>
+            </div>
           </div>
 
           <Card>
@@ -95,11 +188,19 @@ export default function DashboardPage() {
               <table className="w-full text-sm" role="table">
                 <thead>
                   <tr className="border-b border-border-hairline bg-white/50">
-                    <th className="px-4 py-3 text-left font-sans font-medium text-ink/70">Customer</th>
-                    <th className="px-4 py-3 text-right font-sans font-medium text-ink/70">Nominal</th>
-                    <th className="px-4 py-3 text-left font-sans font-medium text-ink/70">Jatuh tempo</th>
-                    <th className="px-4 py-3 text-left font-sans font-medium text-ink/70">Status</th>
-                    <th className="px-4 py-3 text-left font-sans font-medium text-ink/70 w-32"></th>
+                    <TableHeader sortBy="customer_name" currentSortBy={sortBy} currentSortDir={sortDir} onSort={handleSort} align="left">
+                      Customer
+                    </TableHeader>
+                    <TableHeader sortBy="jumlah" currentSortBy={sortBy} currentSortDir={sortDir} onSort={handleSort} align="right">
+                      Nominal
+                    </TableHeader>
+                    <TableHeader sortBy="jatuh_tempo" currentSortBy={sortBy} currentSortDir={sortDir} onSort={handleSort} align="left">
+                      Jatuh tempo
+                    </TableHeader>
+                    <TableHeader sortBy="status" currentSortBy={sortBy} currentSortDir={sortDir} onSort={handleSort} align="left">
+                      Status
+                    </TableHeader>
+                    <th className="px-4 py-3 text-left font-sans font-medium text-ink/70 w-32 border-b border-border-hairline bg-white/50"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -149,32 +250,33 @@ export default function DashboardPage() {
               </table>
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="px-4 py-3 border-t border-border-hairline flex items-center justify-between">
-                <p className="text-sm text-ink/60">
-                  Halaman {currentPage} dari {totalPages}
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled={currentPage === 1}
-                    onClick={() => window.location.search = `?page=${currentPage - 1}`}
-                  >
-                    Sebelumnya
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled={currentPage === totalPages}
-                    onClick={() => window.location.search = `?page=${currentPage + 1}`}
-                  >
-                    Selanjutnya
-                  </Button>
-                </div>
+            {/* Pagination & Info */}
+            <div className="px-4 py-3 border-t border-border-hairline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <p className="text-sm text-ink/60">
+                Menampilkan {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, totalItems)} dari {totalItems} invoice
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                >
+                  Sebelumnya
+                </Button>
+                <span className="text-sm text-ink/70 px-2">
+                  Halaman {currentPage} dari {totalPages || 1}
+                </span>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                >
+                  Selanjutnya
+                </Button>
               </div>
-            )}
+            </div>
           </Card>
         </section>
       </main>

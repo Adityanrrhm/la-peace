@@ -1,5 +1,7 @@
 // API Types - Mirror backend DTOs
 
+export type SortDirection = 'asc' | 'desc';
+
 export interface User {
   id: string;
   email: string;
