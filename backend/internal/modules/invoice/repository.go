@@ -3,7 +3,9 @@ package invoice
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"tagira/internal/pkg/pagination"
 )
@@ -52,7 +54,7 @@ func (r *invoiceRepository) GetByID(ctx context.Context, id string) (*Invoice, e
 
 	var i Invoice
 	err := row.Scan(&i.ID, &i.CustomerID, &i.Jumlah, &i.TanggalTerbit, &i.JatuhTempo, &i.Status, &i.CreatedAt, &i.UpdatedAt)
-	if err == sql.ErrNoRows {
+	if err == pgx.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
@@ -67,13 +69,13 @@ func (r *invoiceRepository) List(ctx context.Context, params pagination.Paginati
 	argIndex := 1
 
 	if filter.Status != "" {
-		whereClause += " AND i.status = $" + string(rune(argIndex+'0'))
+		whereClause += " AND i.status = $" + fmt.Sprintf("%d", argIndex)
 		args = append(args, filter.Status)
 		argIndex++
 	}
 
 	if filter.CustomerID != "" {
-		whereClause += " AND i.customer_id = $" + string(rune(argIndex+'0'))
+		whereClause += " AND i.customer_id = $" + fmt.Sprintf("%d", argIndex)
 		args = append(args, filter.CustomerID)
 		argIndex++
 	}
@@ -93,7 +95,7 @@ func (r *invoiceRepository) List(ctx context.Context, params pagination.Paginati
 	listQuery := `SELECT i.id, i.customer_id, i.jumlah, i.tanggal_terbit, i.jatuh_tempo, i.status, i.created_at, i.updated_at, c.nama
 		FROM invoices i
 		LEFT JOIN customers c ON i.customer_id = c.id
-		` + whereClause + ` ORDER BY ` + sortOrder + ` LIMIT $` + string(rune(argIndex+'0')) + ` OFFSET $` + string(rune(argIndex+1+'0'))
+		` + whereClause + ` ORDER BY ` + sortOrder + ` LIMIT $` + fmt.Sprintf("%d", argIndex) + ` OFFSET $` + fmt.Sprintf("%d", argIndex+1)
 	args = append(args, params.Limit(), params.Offset())
 
 	rows, err := r.db.Query(ctx, listQuery, args...)
@@ -109,6 +111,9 @@ func (r *invoiceRepository) List(ctx context.Context, params pagination.Paginati
 			return nil, 0, err
 		}
 		invoices = append(invoices, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
 	}
 
 	return invoices, total, nil
@@ -140,6 +145,9 @@ func (r *invoiceRepository) GetDueToday(ctx context.Context) ([]*InvoiceWithCust
 			return nil, err
 		}
 		invoices = append(invoices, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return invoices, nil

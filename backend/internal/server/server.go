@@ -1,6 +1,9 @@
 package server
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
@@ -15,10 +18,11 @@ import (
 )
 
 type Server struct {
-	engine *gin.Engine
-	logger zerolog.Logger
-	cfg    *config.Config
-	pool   *database.Pool
+	httpServer *http.Server
+	engine     *gin.Engine
+	logger     zerolog.Logger
+	cfg        *config.Config
+	pool       *database.Pool
 }
 
 func New(cfg *config.Config, pool *database.Pool) *Server {
@@ -94,5 +98,20 @@ func (s *Server) Engine() *gin.Engine {
 
 func (s *Server) Run(addr string) error {
 	s.logger.Info().Str("addr", addr).Msg("Starting server")
-	return s.engine.Run(addr)
+	s.httpServer = &http.Server{
+		Addr:    addr,
+		Handler: s.engine,
+	}
+	if err := s.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return err
+	}
+	return nil
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	if s.httpServer == nil {
+		return nil
+	}
+	s.logger.Info().Msg("Gracefully shutting down HTTP server...")
+	return s.httpServer.Shutdown(ctx)
 }

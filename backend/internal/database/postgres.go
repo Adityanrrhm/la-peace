@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/pgx/v5"
+	pgxmigrate "github.com/golang-migrate/migrate/v4/database/pgx/v5"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/jackc/pgx/v5/stdlib" // register "pgx" driver untuk sql.Open
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/rs/zerolog/log"
 
 	"tagira/internal/config"
@@ -45,11 +45,17 @@ func NewPool(cfg *config.Config) (*Pool, error) {
 	return pool, nil
 }
 
-func Migrate(pool *pgxpool.Pool, migrationsPath string) error {
-	db := stdlib.OpenDBFromPool(pool)
+// Migrate menjalankan migrasi UP menggunakan koneksi mandiri (bukan pool aplikasi).
+// Dengan cara ini pool.Close() tidak akan pernah diblokir oleh sisa koneksi migration.
+func Migrate(dsn, migrationsPath string) error {
+	// Buat koneksi sql.DB mandiri — TIDAK berbagi pool dengan aplikasi
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		return fmt.Errorf("open migration db: %w", err)
+	}
 	defer db.Close()
 
-	driver, err := pgx.WithInstance(db, &pgx.Config{MigrationsTable: "schema_migrations"})
+	driver, err := pgxmigrate.WithInstance(db, &pgxmigrate.Config{MigrationsTable: "schema_migrations"})
 	if err != nil {
 		return fmt.Errorf("create driver: %w", err)
 	}
@@ -60,6 +66,7 @@ func Migrate(pool *pgxpool.Pool, migrationsPath string) error {
 	if err != nil {
 		return fmt.Errorf("create migrate instance: %w", err)
 	}
+	defer m.Close() // lepas advisory lock sebelum db.Close()
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return fmt.Errorf("migrate up: %w", err)
@@ -69,11 +76,15 @@ func Migrate(pool *pgxpool.Pool, migrationsPath string) error {
 	return nil
 }
 
-func MigrateDown(pool *pgxpool.Pool, migrationsPath string, steps int) error {
-	db := stdlib.OpenDBFromPool(pool)
+// MigrateDown menjalankan rollback menggunakan koneksi mandiri (bukan pool aplikasi).
+func MigrateDown(dsn, migrationsPath string, steps int) error {
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		return fmt.Errorf("open migration db: %w", err)
+	}
 	defer db.Close()
 
-	driver, err := pgx.WithInstance(db, &pgx.Config{MigrationsTable: "schema_migrations"})
+	driver, err := pgxmigrate.WithInstance(db, &pgxmigrate.Config{MigrationsTable: "schema_migrations"})
 	if err != nil {
 		return fmt.Errorf("create driver: %w", err)
 	}
@@ -84,6 +95,7 @@ func MigrateDown(pool *pgxpool.Pool, migrationsPath string, steps int) error {
 	if err != nil {
 		return fmt.Errorf("create migrate instance: %w", err)
 	}
+	defer m.Close()
 
 	if err := m.Steps(-steps); err != nil {
 		return fmt.Errorf("migrate down: %w", err)
@@ -95,9 +107,4 @@ func MigrateDown(pool *pgxpool.Pool, migrationsPath string, steps int) error {
 
 func HealthCheck(ctx context.Context, pool *pgxpool.Pool) error {
 	return pool.Ping(ctx)
-}
-
-// Helper to get *sql.DB for migrations
-func GetSQLDB(pool *pgxpool.Pool) *sql.DB {
-	return stdlib.OpenDBFromPool(pool)
 }

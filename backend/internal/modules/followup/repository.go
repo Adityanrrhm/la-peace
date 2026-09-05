@@ -3,6 +3,7 @@ package followup
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"tagira/internal/pkg/pagination"
@@ -49,13 +50,13 @@ func (r *followUpLogRepository) List(ctx context.Context, params pagination.Pagi
 	argIndex := 1
 
 	if filter.InvoiceID != "" {
-		whereClause += " AND f.invoice_id = $" + string(rune(argIndex+'0'))
+		whereClause += " AND f.invoice_id = $" + fmt.Sprintf("%d", argIndex)
 		args = append(args, filter.InvoiceID)
 		argIndex++
 	}
 
 	if filter.Sumber != "" {
-		whereClause += " AND f.sumber = $" + string(rune(argIndex+'0'))
+		whereClause += " AND f.sumber = $" + fmt.Sprintf("%d", argIndex)
 		args = append(args, filter.Sumber)
 		argIndex++
 	}
@@ -76,7 +77,7 @@ func (r *followUpLogRepository) List(ctx context.Context, params pagination.Pagi
 		FROM follow_up_logs f
 		LEFT JOIN invoices i ON f.invoice_id = i.id
 		LEFT JOIN customers c ON i.customer_id = c.id
-		` + whereClause + ` ORDER BY ` + sortOrder + ` LIMIT $` + string(rune(argIndex+'0')) + ` OFFSET $` + string(rune(argIndex+1+'0'))
+		` + whereClause + ` ORDER BY ` + sortOrder + ` LIMIT $` + fmt.Sprintf("%d", argIndex) + ` OFFSET $` + fmt.Sprintf("%d", argIndex+1)
 	args = append(args, params.Limit(), params.Offset())
 
 	rows, err := r.db.Query(ctx, listQuery, args...)
@@ -92,6 +93,9 @@ func (r *followUpLogRepository) List(ctx context.Context, params pagination.Pagi
 			return nil, 0, err
 		}
 		logs = append(logs, &l)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
 	}
 
 	return logs, total, nil
@@ -113,6 +117,9 @@ func (r *followUpLogRepository) GetByInvoiceID(ctx context.Context, invoiceID st
 			return nil, err
 		}
 		logs = append(logs, &l)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return logs, nil

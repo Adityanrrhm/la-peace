@@ -3,7 +3,9 @@ package customer
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"tagira/internal/pkg/pagination"
 )
@@ -44,7 +46,7 @@ func (r *customerRepository) GetByID(ctx context.Context, id string) (*Customer,
 
 	var c Customer
 	err := row.Scan(&c.ID, &c.Nama, &c.KontakTelegram, &c.CatatanPerilakuBayar, &c.CreatedAt)
-	if err == sql.ErrNoRows {
+	if err == pgx.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
@@ -59,7 +61,7 @@ func (r *customerRepository) List(ctx context.Context, params pagination.Paginat
 	argIndex := 1
 
 	if filter.Nama != "" {
-		whereClause += " AND nama ILIKE $" + string(rune(argIndex+'0'))
+		whereClause += " AND nama ILIKE $" + fmt.Sprintf("%d", argIndex)
 		args = append(args, "%"+filter.Nama+"%")
 		argIndex++
 	}
@@ -79,7 +81,7 @@ func (r *customerRepository) List(ctx context.Context, params pagination.Paginat
 	}
 
 	listQuery := `SELECT id, nama, kontak_telegram, catatan_perilaku_bayar, created_at 
-		FROM customers ` + whereClause + ` ORDER BY ` + sortOrder + ` LIMIT $` + string(rune(argIndex+'0')) + ` OFFSET $` + string(rune(argIndex+1+'0'))
+		FROM customers ` + whereClause + ` ORDER BY ` + sortOrder + ` LIMIT $` + fmt.Sprintf("%d", argIndex) + ` OFFSET $` + fmt.Sprintf("%d", argIndex+1)
 	args = append(args, params.Limit(), params.Offset())
 
 	rows, err := r.db.Query(ctx, listQuery, args...)
@@ -95,6 +97,9 @@ func (r *customerRepository) List(ctx context.Context, params pagination.Paginat
 			return nil, 0, err
 		}
 		customers = append(customers, &c)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
 	}
 
 	return customers, total, nil

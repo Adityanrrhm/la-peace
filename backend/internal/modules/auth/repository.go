@@ -2,8 +2,8 @@ package auth
 
 import (
 	"context"
-	"database/sql"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -33,7 +33,7 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*User, e
 
 	var u User
 	err := row.Scan(&u.ID, &u.Email, &u.PasswordHash, &u.CreatedAt)
-	if err == sql.ErrNoRows {
+	if err == pgx.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {

@@ -33,11 +33,10 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to connect to database")
 	}
-	defer pool.Close()
 
 	// Handle migration commands
 	if *migrateFlag {
-		if err := database.Migrate(pool, "migrations"); err != nil {
+		if err := database.Migrate(cfg.GetDSN(), "migrations"); err != nil {
 			log.Fatal().Err(err).Msg("Failed to run migrations")
 		}
 		log.Info().Msg("Migrations completed successfully")
@@ -45,15 +44,15 @@ func main() {
 	}
 
 	if *migrateDownFlag > 0 {
-		if err := database.MigrateDown(pool, "migrations", *migrateDownFlag); err != nil {
+		if err := database.MigrateDown(cfg.GetDSN(), "migrations", *migrateDownFlag); err != nil {
 			log.Fatal().Err(err).Msg("Failed to rollback migrations")
 		}
 		log.Info().Int("steps", *migrateDownFlag).Msg("Migrations rolled back successfully")
 		return
 	}
 
-	// Run server
-	if err := database.Migrate(pool, "migrations"); err != nil {
+	// Run server — migrate otomatis saat startup
+	if err := database.Migrate(cfg.GetDSN(), "migrations"); err != nil {
 		log.Fatal().Err(err).Msg("Failed to run migrations")
 	}
 
@@ -74,6 +73,9 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	_ = ctx
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Error().Err(err).Msg("Server forced to shutdown")
+	}
+	pool.Close()
 	log.Info().Msg("Server exited")
 }
