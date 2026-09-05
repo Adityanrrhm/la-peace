@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
 	"tagira/internal/config"
@@ -18,6 +20,31 @@ func NewAuthHandler(svc *AuthService, cfg *config.Config) *AuthHandler {
 	return &AuthHandler{svc: svc, cfg: cfg}
 }
 
+// setSessionCookie menyetel cookie session_token dengan atribut yang benar.
+// SameSite=Lax cocok saat frontend dan backend diakses lewat proxy (same-origin).
+// Jika diakses cross-origin langsung (tanpa proxy), gunakan SameSite=None + Secure=true.
+func (h *AuthHandler) setSessionCookie(c *gin.Context, token string, maxAge int) {
+	sameSite := http.SameSiteLaxMode
+	secure := false
+
+	if h.cfg.AppEnv == "production" {
+		// Di production, aktifkan Secure dan pertahankan Lax (via proxy/same-domain)
+		// Ganti ke SameSiteNoneMode jika backend dan frontend beda domain
+		secure = true
+	}
+
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "session_token",
+		Value:    token,
+		MaxAge:   maxAge,
+		Path:     "/",
+		Domain:   "",
+		Secure:   secure,
+		HttpOnly: true,
+		SameSite: sameSite,
+	})
+}
+
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -31,18 +58,14 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Set HttpOnly cookie
-	c.SetCookie(
-		"session_token",
-		resp.Token,
-		h.cfg.JWTExpireHours*3600,
-		"/",
-		"",
-		false, // Secure=false for dev, true in production
-		true,  // HttpOnly
-	)
-
+	h.setSessionCookie(c, resp.Token, h.cfg.JWTExpireHours*3600)
 	response.Success(c, resp, nil)
+}
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+	// Hapus cookie dengan MaxAge=0 (expired immediately)
+	h.setSessionCookie(c, "", -1)
+	response.Success(c, gin.H{"message": "Berhasil keluar"}, nil)
 }
 
 func (h *AuthHandler) Me(c *gin.Context) {

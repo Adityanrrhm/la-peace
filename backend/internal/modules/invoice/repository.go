@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,11 +15,11 @@ type Invoice struct {
 	ID            string
 	CustomerID    string
 	Jumlah        int64
-	TanggalTerbit string
-	JatuhTempo    string
+	TanggalTerbit time.Time
+	JatuhTempo    time.Time
 	Status        string
-	CreatedAt     string
-	UpdatedAt     string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 type InvoiceWithCustomer struct {

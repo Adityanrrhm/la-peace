@@ -111,7 +111,7 @@ export default function InvoiceFormPage() {
           <CardContent className="p-4 sm:p-6">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
               {submitError && (
-                <div className="p-3 text-sm text-status-overdue bg-status-overdue/10 border border-status-overdue/20 rounded" role="alert">
+                <div className="p-3 text-sm text-status-overdue bg-status-overdue/10 border border-status-overdue/20" role="alert">
                   {submitError}
                 </div>
               )}

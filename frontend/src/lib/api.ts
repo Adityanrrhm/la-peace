@@ -1,11 +1,14 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import type { ApiError } from '@/types/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+// Selalu gunakan path relatif /api/v1 agar request melalui proxy Next.js.
+// Next.js meneruskan request ke backend Go — browser melihatnya sebagai same-origin.
+// Ini menghilangkan masalah CORS dan cookie cross-origin sepenuhnya.
+const API_BASE_URL = '/api/v1';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, // Important for HttpOnly cookie
+  withCredentials: true, // Tetap diset untuk kelengkapan, cookie bekerja karena same-origin
   headers: {
     'Content-Type': 'application/json',
   },

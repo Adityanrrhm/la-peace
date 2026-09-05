@@ -92,8 +92,8 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
   return (
     <div
       className={cn(
-        'pointer-events-auto w-full max-w-sm px-4 py-3 border rounded',
-        'shadow-lg animate-slide-in',
+        'pointer-events-auto w-full max-w-sm px-4 py-3 border',
+        'animate-slide-in',
         isExiting && 'animate-fade-out',
         bgColors[toast.type]
       )}

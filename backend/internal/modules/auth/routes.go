@@ -11,6 +11,7 @@ func RegisterRoutes(rg *gin.RouterGroup, handler *AuthHandler, cfg *config.Confi
 	auth := rg.Group("/auth")
 	{
 		auth.POST("/login", handler.Login)
+		auth.POST("/logout", handler.Logout)                                 // Hapus cookie session
 		auth.GET("/me", middleware.RequireAuth(cfg), handler.Me)
 	}
 }

@@ -43,7 +43,7 @@ func (s *AuthService) Login(ctx context.Context, req LoginRequest) (*LoginRespon
 		User: UserResponse{
 			ID:        user.ID,
 			Email:     user.Email,
-			CreatedAt: user.CreatedAt,
+			CreatedAt: user.CreatedAt.Format(time.RFC3339),
 		},
 		Token: token,
 	}, nil
@@ -67,7 +67,7 @@ func (s *AuthService) CreateUser(ctx context.Context, email, password string) (*
 		ID:           uuid.New().String(),
 		Email:        email,
 		PasswordHash: string(hash),
-		CreatedAt:    time.Now().Format(time.RFC3339),
+		CreatedAt:    time.Now(),
 	}
 
 	if err := s.repo.Create(ctx, user); err != nil {

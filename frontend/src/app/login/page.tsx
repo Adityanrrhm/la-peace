@@ -61,7 +61,7 @@ export default function LoginPage() {
 
           {error && (
             <div
-              className="mb-6 p-3 text-sm text-status-overdue bg-status-overdue/10 border border-status-overdue/20 rounded"
+              className="mb-6 p-3 text-sm text-status-overdue bg-status-overdue/10 border border-status-overdue/20"
               role="alert"
             >
               {error}

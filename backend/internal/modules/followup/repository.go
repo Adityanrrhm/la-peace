@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"tagira/internal/pkg/pagination"
@@ -12,11 +13,11 @@ import (
 type FollowUpLog struct {
 	ID             string
 	InvoiceID      string
-	TanggalKirim   string
+	TanggalKirim   time.Time
 	IsiPesan       string
 	Sumber         string
 	ResponCustomer sql.NullString
-	CreatedAt      string
+	CreatedAt      time.Time
 }
 
 type FollowUpLogWithInvoice struct {

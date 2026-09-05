@@ -19,7 +19,7 @@ func NewFollowUpLogService(repo FollowUpLogRepository) *FollowUpLogService {
 }
 
 func (s *FollowUpLogService) Create(ctx context.Context, req CreateFollowUpLogRequest) (*FollowUpLogResponse, error) {
-	now := time.Now().Format(time.RFC3339)
+	now := time.Now()
 	f := &FollowUpLog{
 		ID:             uuid.New().String(),
 		InvoiceID:      req.InvoiceID,
@@ -72,11 +72,11 @@ func (s *FollowUpLogService) toResponse(f *FollowUpLog, customerName string) *Fo
 		ID:              f.ID,
 		InvoiceID:       f.InvoiceID,
 		InvoiceCustomer: customerName,
-		TanggalKirim:    f.TanggalKirim,
+		TanggalKirim:    f.TanggalKirim.Format(time.RFC3339),
 		IsiPesan:        f.IsiPesan,
 		Sumber:          f.Sumber,
 		ResponCustomer:  f.ResponCustomer.String,
-		CreatedAt:       f.CreatedAt,
+		CreatedAt:       f.CreatedAt.Format(time.RFC3339),
 	}
 }
 

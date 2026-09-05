@@ -20,7 +20,7 @@ func NewCustomerService(repo CustomerRepository) *CustomerService {
 }
 
 func (s *CustomerService) Create(ctx context.Context, req CreateCustomerRequest) (*CustomerResponse, error) {
-	now := time.Now().Format(time.RFC3339)
+	now := time.Now()
 	c := &Customer{
 		ID:                   uuid.New().String(),
 		Nama:                 req.Nama,
@@ -107,7 +107,7 @@ func (s *CustomerService) toResponse(c *Customer) *CustomerResponse {
 		Nama:                 c.Nama,
 		KontakTelegram:       c.KontakTelegram.String,
 		CatatanPerilakuBayar: c.CatatanPerilakuBayar.String,
-		CreatedAt:            c.CreatedAt,
+		CreatedAt:            c.CreatedAt.Format(time.RFC3339),
 	}
 }
 

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,7 +12,7 @@ type User struct {
 	ID           string
 	Email        string
 	PasswordHash string
-	CreatedAt    string
+	CreatedAt    time.Time
 }
 
 type UserRepository interface {

@@ -16,7 +16,6 @@ export function Stempel({ className, text = 'LUNAS' }: StempelProps) {
         'border-2 border-accent-stamp rounded-full',
         'rotate-[-8deg]',
         'px-3 py-1',
-        'shadow-[2px_2px_0px_#DDD8CC]',
         'transition-all duration-300 ease-out',
         'animate-fade-in',
         className

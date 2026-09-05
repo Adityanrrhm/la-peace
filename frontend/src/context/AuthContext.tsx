@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { useMe } from '@/hooks/useApi';
 import type { MeResponse } from '@/types/api';
 
@@ -9,7 +9,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,7 +25,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Listen for unauthorized events from API interceptor
     const handleUnauthorized = () => {
-      // Force refetch to clear user
       refetch();
     };
 
@@ -33,29 +32,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, [refetch]);
 
-  const login = async (email: string, password: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/auth/login`, {
+  const login = useCallback(async (email: string, password: string) => {
+    // Gunakan path relatif /api/v1 agar melalui proxy Next.js (same-origin)
+    const response = await fetch('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Important for HttpOnly cookie
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'Login gagal');
+      const err = await response.json();
+      throw new Error(err.error?.message || 'Login gagal');
     }
 
-    // Refetch user after successful login
     await refetch();
-  };
+  }, [refetch]);
 
-  const logout = () => {
-    // Clear user state immediately
-    // Note: backend doesn't have logout endpoint yet, so we just clear client state
-    // The cookie will expire on its own
-    refetch();
-  };
+  const logout = useCallback(async () => {
+    try {
+      // Hapus cookie di backend — Set-Cookie dengan MaxAge=0
+      await fetch('/api/v1/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // Lanjutkan meskipun request gagal
+    } finally {
+      // Invalidate query agar useMe() kembali null
+      refetch();
+    }
+  }, [refetch]);
 
   if (!isHydrated) {
     return (

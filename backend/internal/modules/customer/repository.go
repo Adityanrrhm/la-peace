@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -15,7 +16,7 @@ type Customer struct {
 	Nama                 string
 	KontakTelegram       sql.NullString
 	CatatanPerilakuBayar sql.NullString
-	CreatedAt            string
+	CreatedAt            time.Time
 }
 
 type CustomerRepository interface {

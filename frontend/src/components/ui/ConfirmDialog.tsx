@@ -40,7 +40,7 @@ export function ConfirmDialog({
       {/* Dialog */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className={cn(
-          'w-full max-w-md bg-white border border-border-hairline shadow-lg',
+          'w-full max-w-md bg-white border border-border-hairline',
           'animate-slide-up'
         )} role="dialog" aria-modal="true" aria-labelledby="dialog-title">
           <div className="p-4 sm:p-6 border-b border-border-hairline">

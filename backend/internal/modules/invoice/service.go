@@ -19,13 +19,15 @@ func NewInvoiceService(repo InvoiceRepository) *InvoiceService {
 }
 
 func (s *InvoiceService) Create(ctx context.Context, req CreateInvoiceRequest) (*InvoiceResponse, error) {
-	now := time.Now().Format(time.RFC3339)
+	now := time.Now()
+	tTanggalTerbit, _ := time.Parse("2006-01-02", req.TanggalTerbit)
+	tJatuhTempo, _ := time.Parse("2006-01-02", req.JatuhTempo)
 	i := &Invoice{
 		ID:            uuid.New().String(),
 		CustomerID:    req.CustomerID,
 		Jumlah:        req.Jumlah,
-		TanggalTerbit: req.TanggalTerbit,
-		JatuhTempo:    req.JatuhTempo,
+		TanggalTerbit: tTanggalTerbit,
+		JatuhTempo:    tJatuhTempo,
 		Status:        "belum_bayar",
 		CreatedAt:     now,
 		UpdatedAt:     now,
@@ -80,7 +82,7 @@ func (s *InvoiceService) UpdateStatus(ctx context.Context, id, status string) (*
 	}
 
 	existing.Status = status
-	existing.UpdatedAt = time.Now().Format(time.RFC3339)
+	existing.UpdatedAt = time.Now()
 	return s.toResponse(existing, ""), nil
 }
 
@@ -103,10 +105,10 @@ func (s *InvoiceService) toResponse(i *Invoice, customerName string) *InvoiceRes
 		CustomerID:   i.CustomerID,
 		CustomerName: customerName,
 		Jumlah:       i.Jumlah,
-		TanggalTerbit: i.TanggalTerbit,
-		JatuhTempo:   i.JatuhTempo,
+		TanggalTerbit: i.TanggalTerbit.Format("2006-01-02"),
+		JatuhTempo:   i.JatuhTempo.Format("2006-01-02"),
 		Status:       i.Status,
-		CreatedAt:    i.CreatedAt,
-		UpdatedAt:    i.UpdatedAt,
+		CreatedAt:    i.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:    i.UpdatedAt.Format(time.RFC3339),
 	}
 }
