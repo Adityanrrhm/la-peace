@@ -6,9 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { useCustomers, useInvoice } from '@/hooks/useApi';
-import { formatCurrency } from '@/lib/utils';
-import { Button, Card, CardContent, CardHeader, Label, Input, Select, SelectItem } from '@/components/ui';
+import { useCustomers, useInvoice, useUpdateInvoice } from '@/hooks/useApi';
+import { Button, Card, CardContent, Label, Input, Select, SelectItem, useToast } from '@/components/ui';
 
 const invoiceSchema = z.object({
   customer_id: z.string().uuid('Pilih customer yang valid'),
@@ -26,18 +25,13 @@ export default function InvoiceEditPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { addToast } = useToast();
 
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { data: customersData, isLoading: customersLoading } = useCustomers({ page_size: 100 });
   const { data: invoice, isLoading: invoiceLoading } = useInvoice(id);
-
-  const defaultValues: InvoiceFormData = {
-    customer_id: '',
-    jumlah: 0,
-    tanggal_terbit: '',
-    jatuh_tempo: '',
-  };
+  const updateInvoice = useUpdateInvoice();
 
   const {
     register,
@@ -47,27 +41,37 @@ export default function InvoiceEditPage() {
     formState: { errors },
   } = useForm<InvoiceFormData>({
     resolver: zodResolver(invoiceSchema),
-    defaultValues,
+    // values (bukan defaultValues/setValue)  buat ngesync data server ke form
+    // tiap query update tanpa ngereset field yang lagi diketik
+    values: invoice
+      ? {
+          customer_id: invoice.customer_id,
+          jumlah: invoice.jumlah,
+          tanggal_terbit: invoice.tanggal_terbit,
+          jatuh_tempo: invoice.jatuh_tempo,
+        }
+      : undefined,
   });
-
-  // Prefill form when invoice data loads
-  if (invoice && !invoiceLoading) {
-    setValue('customer_id', invoice.customer_id, { shouldValidate: true });
-    setValue('jumlah', invoice.jumlah, { shouldValidate: true });
-    setValue('tanggal_terbit', invoice.tanggal_terbit, { shouldValidate: true });
-    setValue('jatuh_tempo', invoice.jatuh_tempo, { shouldValidate: true });
-  }
 
   const onSubmit = async (data: InvoiceFormData) => {
     setSubmitError(null);
     try {
-      // Note: We need a proper useUpdateInvoice hook for full edit
-      // For now, show success and redirect
-      console.log('Update invoice:', id, data);
+      await updateInvoice.mutateAsync({
+        id,
+        data: {
+          customer_id: data.customer_id,
+          jumlah: data.jumlah,
+          jatuh_tempo: data.jatuh_tempo,
+        },
+      });
+
+      addToast({ type: 'success', title: 'Invoice diperbarui', description: 'Perubahan telah disimpan' });
       router.push(`/invoices/${id}`);
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Gagal mengupdate invoice');
+      const message = err instanceof Error ? err.message : 'Gagal mengupdate invoice';
+      setSubmitError(message);
+      addToast({ type: 'error', title: 'Gagal mengupdate', description: message });
     }
   };
 
@@ -125,7 +129,7 @@ export default function InvoiceEditPage() {
                   value={watch('customer_id')}
                   onChange={(e) => setValue('customer_id', e.target.value)}
                   className="w-full"
-                  disabled={customersLoading}
+                  disabled={customersLoading || updateInvoice.isPending}
                 >
                   <SelectItem value="" disabled>Pilih customer</SelectItem>
                   {customers.map((customer) => (
@@ -149,7 +153,7 @@ export default function InvoiceEditPage() {
                     step="1"
                     placeholder="100000"
                     {...register('jumlah')}
-                    disabled={invoiceLoading}
+                    disabled={isSubmitting || updateInvoice.isPending}
                     aria-invalid={!!errors.jumlah}
                     aria-describedby={errors.jumlah ? 'jumlah-error' : undefined}
                   />
@@ -183,9 +187,9 @@ export default function InvoiceEditPage() {
                   <Input
                     id="jatuh_tempo"
                     type="date"
-                    min={watch('tanggal_terbit') || invoice.tanggal_terbit}
+                    min={invoice.tanggal_terbit}
                     {...register('jatuh_tempo')}
-                    disabled={invoiceLoading}
+                    disabled={isSubmitting || updateInvoice.isPending}
                     aria-invalid={!!errors.jatuh_tempo}
                     aria-describedby={errors.jatuh_tempo ? 'jatuh_tempo-error' : undefined}
                   />
@@ -205,10 +209,10 @@ export default function InvoiceEditPage() {
                 </Link>
                 <Button
                   type="submit"
-                  disabled={invoiceLoading}
+                  disabled={isSubmitting || updateInvoice.isPending}
                   className="flex-1 sm:w-auto"
                 >
-                  Simpan Perubahan
+                  {isSubmitting || updateInvoice.isPending ? 'Menyimpan...' : 'Simpan Perubahan'}
                 </Button>
               </div>
             </form>

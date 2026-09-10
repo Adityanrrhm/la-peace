@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { useCustomers, useCreateInvoice, useUpdateInvoiceStatus, useInvoice } from '@/hooks/useApi';
+import { useCustomers, useCreateInvoice } from '@/hooks/useApi';
 import { formatCurrency } from '@/lib/utils';
 import { Button, Card, CardContent, CardHeader, Label, Input, Select, SelectItem, useToast } from '@/components/ui';
 
@@ -24,18 +24,12 @@ type InvoiceFormData = z.infer<typeof invoiceSchema>;
 
 export default function InvoiceFormPage() {
   const router = useRouter();
-  const params = useParams();
-  const isEdit = !!params.id;
-  const id = params.id as string;
   const { addToast } = useToast();
 
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { data: customersData, isLoading: customersLoading } = useCustomers({ page_size: 100 });
   const createInvoice = useCreateInvoice();
-  const updateStatus = useUpdateInvoiceStatus();
-
-  const { data: invoice, isLoading: invoiceLoading } = useInvoice(id, { enabled: isEdit });
 
   const defaultValues: InvoiceFormData = {
     customer_id: '',
@@ -55,23 +49,11 @@ export default function InvoiceFormPage() {
     defaultValues,
   });
 
-  if (isEdit && invoice && !customersLoading) {
-    setValue('customer_id', invoice.customer_id);
-    setValue('jumlah', invoice.jumlah);
-    setValue('tanggal_terbit', invoice.tanggal_terbit);
-    setValue('jatuh_tempo', invoice.jatuh_tempo);
-  }
-
   const onSubmit = async (data: InvoiceFormData) => {
     setSubmitError(null);
     try {
-      if (isEdit) {
-        await updateStatus.mutateAsync({ id, status: 'belum_bayar' });
-        addToast({ type: 'success', title: 'Invoice diperbarui', description: 'Perubahan telah disimpan' });
-      } else {
-        await createInvoice.mutateAsync(data);
-        addToast({ type: 'success', title: 'Invoice dibuat', description: 'Invoice baru telah disimpan' });
-      }
+      await createInvoice.mutateAsync(data);
+      addToast({ type: 'success', title: 'Invoice dibuat', description: 'Invoice baru telah disimpan' });
       router.push('/');
       router.refresh();
     } catch (err) {
@@ -80,14 +62,6 @@ export default function InvoiceFormPage() {
       addToast({ type: 'error', title: 'Gagal menyimpan', description: message });
     }
   };
-
-  if (isEdit && invoiceLoading) {
-    return (
-      <div className="min-h-screen bg-bg-base flex items-center justify-center">
-        <div className="animate-pulse text-ink/50">Memuat invoice...</div>
-      </div>
-    );
-  }
 
   const customers = customersData?.data?.customers ?? [];
 
@@ -100,7 +74,7 @@ export default function InvoiceFormPage() {
               ← Kembali
             </Link>
             <h1 className="font-serif text-xl font-bold text-ink">
-              {isEdit ? 'Edit Invoice' : 'Tambah Invoice Baru'}
+              Tambah Invoice Baru
             </h1>
           </div>
         </div>
@@ -164,7 +138,7 @@ export default function InvoiceFormPage() {
                     id="tanggal_terbit"
                     type="date"
                     {...register('tanggal_terbit')}
-                    disabled={createInvoice.isPending || isEdit}
+                    disabled={createInvoice.isPending}
                     aria-invalid={!!errors.tanggal_terbit}
                     aria-describedby={errors.tanggal_terbit ? 'tanggal_terbit-error' : undefined}
                   />
@@ -195,7 +169,7 @@ export default function InvoiceFormPage() {
               </div>
 
               <div className="pt-4 border-t border-border-hairline flex flex-col sm:flex-row gap-3 justify-end">
-                <Link href={isEdit ? `/invoices/${id}` : '/'} className="flex-1 sm:flex-none">
+                <Link href="/" className="flex-1 sm:flex-none">
                   <Button type="button" variant="secondary" className="w-full sm:w-auto">
                     Batal
                   </Button>
@@ -205,7 +179,7 @@ export default function InvoiceFormPage() {
                   disabled={createInvoice.isPending || customersLoading}
                   className="flex-1 sm:w-auto"
                 >
-                  {isSubmitting || createInvoice.isPending ? 'Menyimpan...' : isEdit ? 'Simpan Perubahan' : 'Simpan Invoice'}
+                  {isSubmitting || createInvoice.isPending ? 'Menyimpan...' : 'Simpan Invoice'}
                 </Button>
               </div>
             </form>

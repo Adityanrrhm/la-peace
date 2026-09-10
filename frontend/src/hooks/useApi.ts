@@ -7,6 +7,7 @@ import type {
   CustomerListResponse,
   Invoice,
   CreateInvoiceRequest,
+  UpdateInvoiceRequest,
   UpdateInvoiceStatusRequest,
   InvoiceListResponse,
   DueTodayInvoiceResponse,
@@ -166,6 +167,24 @@ export function useCreateInvoice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.summary.daily });
+    },
+    onError: (error) => {
+      throw new Error(getApiErrorMessage(error));
+    },
+  });
+}
+
+export function useUpdateInvoice() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateInvoiceRequest }) => {
+      const response = await api.patch<{ success: boolean; data: Invoice }>(`/invoices/${id}`, data);
+      return response.data.data;
+    },
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.invoices.detail(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.summary.daily });
     },
     onError: (error) => {

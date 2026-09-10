@@ -11,6 +11,12 @@ type CreateInvoiceRequest struct {
 	JatuhTempo string `json:"jatuh_tempo" binding:"required"` // YYYY-MM-DD
 }
 
+type UpdateInvoiceRequest struct {
+	CustomerID *string `json:"customer_id" binding:"omitempty,uuid"`
+	Jumlah     *int64  `json:"jumlah" binding:"omitempty,min=1"`
+	JatuhTempo *string `json:"jatuh_tempo" binding:"omitempty"` // YYYY-MM-DD
+}
+
 type UpdateInvoiceStatusRequest struct {
 	Status string `json:"status" binding:"required,oneof=belum_bayar lunas terlambat"`
 }

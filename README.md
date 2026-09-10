@@ -26,7 +26,7 @@ la-peace/
 │   ├── docker-compose.dev.yml # Development with hot reload
 │   ├── Makefile             # Build, test, deploy commands
 │   └── .env.example         # Environment template
-└── frontend/                # Next.js Frontend (akan ditambah nanti)
+└── frontend/                # Next.js Frontend (Dashboard)
 ```
 
 ## Quick Start (Backend)
@@ -44,6 +44,23 @@ make docker-up
 # Or run locally (requires PostgreSQL)
 make run
 ```
+
+## Quick Start (Frontend)
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Setup env (optional, defaults to http://localhost:8080/api/v1)
+echo "NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1" > .env.local
+
+# Run dev server
+npm run dev
+```
+
+Buka http://localhost:3000, backend harus jalan dulu di port 8080.
 
 ## API Endpoints
 

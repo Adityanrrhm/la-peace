@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
-import { useCustomer } from '@/hooks/useApi';
+import { useCustomer, useUpdateCustomer } from '@/hooks/useApi';
 import { formatCurrency } from '@/lib/utils';
 import { Button, Card, CardContent, CardHeader, Label, Input, Stempel, useToast } from '@/components/ui';
 
@@ -29,45 +29,36 @@ export default function CustomerDetailPage() {
 
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const { data: customer, isLoading: customerLoading, refetch } = useCustomer(id);
+  const { data: customer, isLoading: customerLoading } = useCustomer(id);
+  const updateCustomer = useUpdateCustomer();
 
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<CustomerFormData>({
     resolver: zodResolver(customerSchema),
-    defaultValues: {
-      nama: '',
-      kontak_telegram: '',
-      catatan_perilaku_bayar: '',
-    },
+    values: customer
+      ? {
+          nama: customer.nama,
+          kontak_telegram: customer.kontak_telegram || '',
+          catatan_perilaku_bayar: customer.catatan_perilaku_bayar || '',
+        }
+      : undefined,
   });
-
-  if (customer && !customerLoading) {
-    setValue('nama', customer.nama, { shouldValidate: true });
-    setValue('kontak_telegram', customer.kontak_telegram || '', { shouldValidate: true });
-    setValue('catatan_perilaku_bayar', customer.catatan_perilaku_bayar || '', { shouldValidate: true });
-  }
 
   const onSubmit = async (data: CustomerFormData) => {
     setSubmitError(null);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/customers/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
+      await updateCustomer.mutateAsync({
+        id,
+        data: {
+          nama: data.nama,
+          kontak_telegram: data.kontak_telegram || undefined,
+          catatan_perilaku_bayar: data.catatan_perilaku_bayar || undefined,
+        },
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || 'Gagal mengupdate customer');
-      }
-
-      await refetch();
       addToast({ type: 'success', title: 'Customer diperbarui', description: 'Perubahan telah disimpan' });
       router.push('/customers');
       router.refresh();

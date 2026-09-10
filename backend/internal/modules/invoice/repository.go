@@ -32,6 +32,7 @@ type InvoiceRepository interface {
 	GetByID(ctx context.Context, id string) (*Invoice, error)
 	List(ctx context.Context, params pagination.PaginationParams, filter InvoiceFilterParams) ([]*InvoiceWithCustomer, int64, error)
 	UpdateStatus(ctx context.Context, id, status string) error
+	Update(ctx context.Context, i *Invoice) error
 	GetDueToday(ctx context.Context) ([]*InvoiceWithCustomer, error)
 }
 
@@ -123,6 +124,12 @@ func (r *invoiceRepository) List(ctx context.Context, params pagination.Paginati
 func (r *invoiceRepository) UpdateStatus(ctx context.Context, id, status string) error {
 	query := `UPDATE invoices SET status = $2, updated_at = NOW() WHERE id = $1`
 	_, err := r.db.Exec(ctx, query, id, status)
+	return err
+}
+
+func (r *invoiceRepository) Update(ctx context.Context, i *Invoice) error {
+	query := `UPDATE invoices SET customer_id = $2, jumlah = $3, jatuh_tempo = $4, updated_at = $5 WHERE id = $1`
+	_, err := r.db.Exec(ctx, query, i.ID, i.CustomerID, i.Jumlah, i.JatuhTempo, i.UpdatedAt)
 	return err
 }
 

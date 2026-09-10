@@ -3,6 +3,7 @@ package invoice
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -10,6 +11,17 @@ import (
 
 	"tagira/internal/pkg/pagination"
 )
+
+func mustDate(t *testing.T, s string) time.Time {
+	t.Helper()
+	for _, layout := range []string{time.RFC3339, "2006-01-02"} {
+		if v, err := time.Parse(layout, s); err == nil {
+			return v
+		}
+	}
+	t.Fatalf("invalid date %q", s)
+	return time.Time{}
+}
 
 type MockInvoiceRepository struct {
 	mock.Mock
@@ -32,6 +44,11 @@ func (m *MockInvoiceRepository) List(ctx context.Context, params pagination.Pagi
 
 func (m *MockInvoiceRepository) UpdateStatus(ctx context.Context, id, status string) error {
 	args := m.Called(ctx, id, status)
+	return args.Error(0)
+}
+
+func (m *MockInvoiceRepository) Update(ctx context.Context, i *Invoice) error {
+	args := m.Called(ctx, i)
 	return args.Error(0)
 }
 
@@ -74,11 +91,11 @@ func TestInvoiceService_GetByID(t *testing.T) {
 		ID:            id,
 		CustomerID:    uuid.New().String(),
 		Jumlah:        100000,
-		TanggalTerbit: "2024-01-01",
-		JatuhTempo:    "2024-01-15",
+		TanggalTerbit: mustDate(t, "2024-01-01"),
+		JatuhTempo:    mustDate(t, "2024-01-15"),
 		Status:        "belum_bayar",
-		CreatedAt:     "2024-01-01T00:00:00Z",
-		UpdatedAt:     "2024-01-01T00:00:00Z",
+		CreatedAt:     mustDate(t, "2024-01-01T00:00:00Z"),
+		UpdatedAt:     mustDate(t, "2024-01-01T00:00:00Z"),
 	}
 
 	mockRepo.On("GetByID", mock.Anything, id).Return(expected, nil)
@@ -121,6 +138,45 @@ func TestInvoiceService_List(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, resp.Invoices, 2)
 	assert.Equal(t, int64(2), resp.Meta.TotalItems)
+	mockRepo.AssertExpectations(t)
+}
+
+func TestInvoiceService_Update(t *testing.T) {
+	mockRepo := new(MockInvoiceRepository)
+	svc := NewInvoiceService(mockRepo)
+
+	id := uuid.New().String()
+	newCustomerID := uuid.New().String()
+	existing := &Invoice{ID: id, CustomerID: uuid.New().String(), Jumlah: 100000, JatuhTempo: mustDate(t, "2024-01-15"), Status: "belum_bayar"}
+	jumlah := int64(250000)
+	jatuhTempo := "2024-02-01"
+	req := UpdateInvoiceRequest{CustomerID: &newCustomerID, Jumlah: &jumlah, JatuhTempo: &jatuhTempo}
+
+	mockRepo.On("GetByID", mock.Anything, id).Return(existing, nil)
+	mockRepo.On("Update", mock.Anything, mock.MatchedBy(func(i *Invoice) bool {
+		return i.CustomerID == newCustomerID && i.Jumlah == jumlah
+	})).Return(nil)
+
+	resp, err := svc.Update(context.Background(), id, req)
+	assert.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Equal(t, newCustomerID, resp.CustomerID)
+	assert.Equal(t, jumlah, resp.Jumlah)
+	assert.Equal(t, "2024-02-01", resp.JatuhTempo)
+	assert.Equal(t, "belum_bayar", resp.Status)
+	mockRepo.AssertExpectations(t)
+}
+
+func TestInvoiceService_Update_NotFound(t *testing.T) {
+	mockRepo := new(MockInvoiceRepository)
+	svc := NewInvoiceService(mockRepo)
+
+	mockRepo.On("GetByID", mock.Anything, "non-existent").Return((*Invoice)(nil), nil)
+
+	resp, err := svc.Update(context.Background(), "non-existent", UpdateInvoiceRequest{})
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.Contains(t, err.Error(), "not found")
 	mockRepo.AssertExpectations(t)
 }
 

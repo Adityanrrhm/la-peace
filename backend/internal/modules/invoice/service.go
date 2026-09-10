@@ -68,6 +68,37 @@ func (s *InvoiceService) List(ctx context.Context, params pagination.PaginationP
 	}, nil
 }
 
+func (s *InvoiceService) Update(ctx context.Context, id string, req UpdateInvoiceRequest) (*InvoiceResponse, error) {
+	existing, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if existing == nil {
+		return nil, errors.New("invoice not found")
+	}
+
+	if req.CustomerID != nil {
+		existing.CustomerID = *req.CustomerID
+	}
+	if req.Jumlah != nil {
+		existing.Jumlah = *req.Jumlah
+	}
+	if req.JatuhTempo != nil {
+		tJatuhTempo, err := time.Parse("2006-01-02", *req.JatuhTempo)
+		if err != nil {
+			return nil, errors.New("invalid jatuh_tempo, expected YYYY-MM-DD")
+		}
+		existing.JatuhTempo = tJatuhTempo
+	}
+
+	if err := s.repo.Update(ctx, existing); err != nil {
+		return nil, err
+	}
+
+	existing.UpdatedAt = time.Now()
+	return s.toResponse(existing, ""), nil
+}
+
 func (s *InvoiceService) UpdateStatus(ctx context.Context, id, status string) (*InvoiceResponse, error) {
 	existing, err := s.repo.GetByID(ctx, id)
 	if err != nil {
