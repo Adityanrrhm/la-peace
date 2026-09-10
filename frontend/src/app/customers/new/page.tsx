@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
+import { useCreateCustomer } from '@/hooks/useApi';
 import { Button, Card, CardContent, CardHeader, Label, Input } from '@/components/ui';
 
 const customerSchema = z.object({
@@ -22,6 +23,7 @@ type CustomerFormData = z.infer<typeof customerSchema>;
 export default function CustomerNewPage() {
   const router = useRouter();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const createCustomer = useCreateCustomer();
 
   const {
     register,
@@ -39,17 +41,11 @@ export default function CustomerNewPage() {
   const onSubmit = async (data: CustomerFormData) => {
     setSubmitError(null);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/customers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
+      await createCustomer.mutateAsync({
+        nama: data.nama,
+        kontak_telegram: data.kontak_telegram || undefined,
+        catatan_perilaku_bayar: data.catatan_perilaku_bayar || undefined,
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error?.message || 'Gagal menambah customer');
-      }
 
       router.push('/customers');
       router.refresh();

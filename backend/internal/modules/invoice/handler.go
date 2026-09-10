@@ -62,6 +62,27 @@ func (h *InvoiceHandler) List(c *gin.Context) {
 	response.Success(c, resp, nil)
 }
 
+func (h *InvoiceHandler) Update(c *gin.Context) {
+	id := c.Param("id")
+	var req UpdateInvoiceRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, errors.NewValidationError(err.Error()))
+		return
+	}
+
+	resp, err := h.svc.Update(c.Request.Context(), id, req)
+	if err != nil {
+		if err.Error() == "invoice not found" {
+			response.Error(c, errors.NewNotFound("Invoice"))
+			return
+		}
+		response.Error(c, errors.NewInternal(err.Error()))
+		return
+	}
+
+	response.Success(c, resp, nil)
+}
+
 func (h *InvoiceHandler) UpdateStatus(c *gin.Context) {
 	id := c.Param("id")
 	var req UpdateInvoiceStatusRequest

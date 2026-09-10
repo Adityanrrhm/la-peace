@@ -15,6 +15,7 @@ type DailySummary struct {
 	BelumTagih      int
 	Terlambat       int
 	Lunas           int
+	BelumBayar      int
 	TotalJumlah     int64
 	TotalBelum      int64
 	TotalTerlambat  int64
@@ -55,6 +56,9 @@ func (r *summaryRepository) GetDailySummary(ctx context.Context) (*DailySummary,
 	// Terlambat: invoice dengan status terlambat
 	terlambatQuery := `SELECT COUNT(*) FROM invoices WHERE status = 'terlambat'`
 
+	// belum bayar = invoice dengan status belum_bayar
+	belumBayarQuery := `SELECT COUNT(*) FROM invoices WHERE status = 'belum_bayar'`
+
 	// Lunas: invoice dengan status lunas
 	lunasQuery := `SELECT COUNT(*) FROM invoices WHERE status = 'lunas'`
 
@@ -85,6 +89,11 @@ func (r *summaryRepository) GetDailySummary(ctx context.Context) (*DailySummary,
 	}
 
 	err = r.db.QueryRow(ctx, lunasQuery).Scan(&summary.Lunas)
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.db.QueryRow(ctx, belumBayarQuery).Scan(&summary.BelumBayar)
 	if err != nil {
 		return nil, err
 	}

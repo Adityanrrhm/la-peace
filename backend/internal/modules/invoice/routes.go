@@ -16,5 +16,6 @@ func RegisterRoutes(rg *gin.RouterGroup, handler *InvoiceHandler, cfg *config.Co
 		invoices.GET("/due-today", middleware.RequireAuth(cfg), handler.GetDueToday)
 		invoices.GET("/:id", handler.GetByID)
 		invoices.PATCH("/:id/status", handler.UpdateStatus)
+		invoices.PATCH("/:id", handler.Update)
 	}
 }

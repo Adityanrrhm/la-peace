@@ -35,11 +35,6 @@ export default function DashboardPage() {
   const currentPage = invoicesData?.meta?.page ?? 1;
   const totalItems = invoicesData?.meta?.total_items ?? 0;
 
-  const statusCounts = invoices.reduce((acc, inv) => {
-    acc[inv.status] = (acc[inv.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
   // URL sync helpers
   const updateFilters = useCallback((newParams: Record<string, string | number | undefined>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -136,9 +131,9 @@ export default function DashboardPage() {
 
               {/* Status counts row */}
               <div className="flex flex-wrap gap-4 text-sm text-ink/70">
-                <span className="font-medium">Terlambat: <span className="text-status-overdue font-semibold">{statusCounts.terlambat ?? 0}</span></span>
-                <span className="font-medium">Belum bayar: <span className="text-ink/70 font-semibold">{statusCounts.belum_bayar ?? 0}</span></span>
-                <span className="font-medium">Lunas: <span className="text-status-paid font-semibold">{statusCounts.lunas ?? 0}</span></span>
+                <span className="font-medium">Terlambat: <span className="text-status-overdue font-semibold">{summary?.terlambat ?? 0}</span></span>
+                <span className="font-medium">Belum bayar: <span className="text-ink/70 font-semibold">{summary?.belum_bayar ?? 0}</span></span>
+                <span className="font-medium">Lunas: <span className="text-status-paid font-semibold">{summary?.lunas ?? 0}</span></span>
               </div>
             </CardContent>
           </Card>

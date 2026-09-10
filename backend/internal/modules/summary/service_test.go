@@ -25,6 +25,7 @@ func TestSummaryService_GetDailySummary(t *testing.T) {
 		Tertagih:        5,
 		BelumTagih:      3,
 		Terlambat:       2,
+		BelumBayar:      7,
 		Lunas:           10,
 		TotalJumlah:     10000000,
 		TotalBelum:      5000000,
@@ -39,6 +40,7 @@ func TestSummaryService_GetDailySummary(t *testing.T) {
 	assert.Equal(t, expectedSummary.Tertagih, resp.Tertagih)
 	assert.Equal(t, expectedSummary.BelumTagih, resp.BelumTagih)
 	assert.Equal(t, expectedSummary.Terlambat, resp.Terlambat)
+	assert.Equal(t, expectedSummary.BelumBayar, resp.BelumBayar)
 	assert.Equal(t, expectedSummary.Lunas, resp.Lunas)
 	assert.Equal(t, expectedSummary.TotalJumlah, resp.TotalJumlah)
 	assert.Equal(t, expectedSummary.TotalBelum, resp.TotalBelum)

@@ -22,6 +22,7 @@ func (s *SummaryService) GetDailySummary(ctx context.Context) (*DailySummaryResp
 		Tertagih:        summary.Tertagih,
 		BelumTagih:      summary.BelumTagih,
 		Terlambat:       summary.Terlambat,
+		BelumBayar:      summary.BelumBayar,
 		Lunas:           summary.Lunas,
 		TotalJumlah:     summary.TotalJumlah,
 		TotalBelum:      summary.TotalBelum,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -11,6 +12,17 @@ import (
 
 	"tagira/internal/pkg/pagination"
 )
+
+func mustDate(t *testing.T, s string) time.Time {
+	t.Helper()
+	for _, layout := range []string{time.RFC3339, "2006-01-02"} {
+		if v, err := time.Parse(layout, s); err == nil {
+			return v
+		}
+	}
+	t.Fatalf("invalid date %q", s)
+	return time.Time{}
+}
 
 type MockCustomerRepository struct {
 	mock.Mock
@@ -74,7 +86,7 @@ func TestCustomerService_GetByID(t *testing.T) {
 		Nama:                 "Test",
 		KontakTelegram:       sqlNullString("@test"),
 		CatatanPerilakuBayar: sqlNullString("Good payer"),
-		CreatedAt:            "2024-01-01T00:00:00Z",
+		CreatedAt:            mustDate(t, "2024-01-01T00:00:00Z"),
 	}
 
 	mockRepo.On("GetByID", mock.Anything, id).Return(expected, nil)

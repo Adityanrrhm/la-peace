@@ -94,6 +94,12 @@ export interface CreateInvoiceRequest {
   jatuh_tempo: string;
 }
 
+export interface UpdateInvoiceRequest {
+  customer_id?: string;
+  jumlah?: number;
+  jatuh_tempo?: string;
+}
+
 export interface UpdateInvoiceStatusRequest {
   status: 'belum_bayar' | 'lunas' | 'terlambat';
 }
@@ -171,6 +177,7 @@ export interface DailySummaryResponse {
     tertangih: number;
     belum_tagih: number;
     terlambat: number;
+    belum_bayar: number;
     lunas: number;
     total_jumlah: number;
     total_belum: number;
