@@ -2,6 +2,7 @@ package invoice
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 	"time"
 
@@ -40,6 +41,11 @@ func (m *MockInvoiceRepository) GetByID(ctx context.Context, id string) (*Invoic
 func (m *MockInvoiceRepository) List(ctx context.Context, params pagination.PaginationParams, filter InvoiceFilterParams) ([]*InvoiceWithCustomer, int64, error) {
 	args := m.Called(ctx, params, filter)
 	return args.Get(0).([]*InvoiceWithCustomer), args.Get(1).(int64), args.Error(2)
+}
+
+func (m *MockInvoiceRepository) Delete(ctx context.Context, id string) error {
+	args := m.Called(ctx, id)
+	return args.Error(0)
 }
 
 func (m *MockInvoiceRepository) UpdateStatus(ctx context.Context, id, status string) error {
@@ -167,6 +173,31 @@ func TestInvoiceService_Update(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
+func TestInvoiceService_Delete(t *testing.T) {
+	mockRepo := new(MockInvoiceRepository)
+	svc := NewInvoiceService(mockRepo)
+
+	id := uuid.New().String()
+	mockRepo.On("GetByID", mock.Anything, id).Return(&Invoice{ID: id}, nil)
+	mockRepo.On("Delete", mock.Anything, id).Return(nil)
+
+	err := svc.Delete(context.Background(), id)
+	assert.NoError(t, err)
+	mockRepo.AssertExpectations(t)
+}
+
+func TestInvoiceService_Delete_NotFound(t *testing.T) {
+	mockRepo := new(MockInvoiceRepository)
+	svc := NewInvoiceService(mockRepo)
+
+	mockRepo.On("GetByID", mock.Anything, "gone").Return((*Invoice)(nil), nil)
+
+	err := svc.Delete(context.Background(), "gone")
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "not found")
+	mockRepo.AssertExpectations(t)
+}
+
 func TestInvoiceService_Update_NotFound(t *testing.T) {
 	mockRepo := new(MockInvoiceRepository)
 	svc := NewInvoiceService(mockRepo)
@@ -202,7 +233,7 @@ func TestInvoiceService_GetDueToday(t *testing.T) {
 
 	customerID := uuid.New().String()
 	expectedInvoices := []*InvoiceWithCustomer{
-		{Invoice: Invoice{ID: uuid.New().String(), CustomerID: customerID, Jumlah: 100000, Status: "belum_bayar"}},
+		{Invoice: Invoice{ID: uuid.New().String(), CustomerID: customerID, Jumlah: 100000, Status: "belum_bayar"}, CustomerName: sql.NullString{String: "Budi", Valid: true}, KontakTelegram: sql.NullString{String: "@budi", Valid: true}},
 		{Invoice: Invoice{ID: uuid.New().String(), CustomerID: customerID, Jumlah: 200000, Status: "terlambat"}},
 	}
 

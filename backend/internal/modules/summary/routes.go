@@ -9,7 +9,7 @@ import (
 
 func RegisterRoutes(rg *gin.RouterGroup, handler *SummaryHandler, cfg *config.Config) {
 	summary := rg.Group("/summary")
-	summary.Use(middleware.RequireAuth(cfg))
+	summary.Use(middleware.RequireAny(cfg))
 	{
 		summary.GET("/daily", handler.GetDaily)
 	}

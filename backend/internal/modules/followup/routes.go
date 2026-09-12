@@ -9,7 +9,7 @@ import (
 
 func RegisterRoutes(rg *gin.RouterGroup, handler *FollowUpLogHandler, cfg *config.Config) {
 	followup := rg.Group("/follow-up-logs")
-	followup.Use(middleware.RequireAuth(cfg))
+	followup.Use(middleware.RequireAny(cfg))
 	{
 		followup.POST("", handler.Create)
 		followup.GET("", handler.List)

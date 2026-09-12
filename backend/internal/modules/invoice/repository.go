@@ -24,7 +24,8 @@ type Invoice struct {
 
 type InvoiceWithCustomer struct {
 	Invoice
-	CustomerName sql.NullString
+	CustomerName     sql.NullString
+	KontakTelegram   sql.NullString
 }
 
 type InvoiceRepository interface {
@@ -33,6 +34,7 @@ type InvoiceRepository interface {
 	List(ctx context.Context, params pagination.PaginationParams, filter InvoiceFilterParams) ([]*InvoiceWithCustomer, int64, error)
 	UpdateStatus(ctx context.Context, id, status string) error
 	Update(ctx context.Context, i *Invoice) error
+	Delete(ctx context.Context, id string) error
 	GetDueToday(ctx context.Context) ([]*InvoiceWithCustomer, error)
 }
 
@@ -133,8 +135,13 @@ func (r *invoiceRepository) Update(ctx context.Context, i *Invoice) error {
 	return err
 }
 
+func (r *invoiceRepository) Delete(ctx context.Context, id string) error {
+	_, err := r.db.Exec(ctx, `DELETE FROM invoices WHERE id = $1`, id)
+	return err
+}
+
 func (r *invoiceRepository) GetDueToday(ctx context.Context) ([]*InvoiceWithCustomer, error) {
-	query := `SELECT i.id, i.customer_id, i.jumlah, i.tanggal_terbit, i.jatuh_tempo, i.status, i.created_at, i.updated_at, c.nama
+	query := `SELECT i.id, i.customer_id, i.jumlah, i.tanggal_terbit, i.jatuh_tempo, i.status, i.created_at, i.updated_at, c.nama, c.kontak_telegram
 		FROM invoices i
 		LEFT JOIN customers c ON i.customer_id = c.id
 		WHERE i.jatuh_tempo <= CURRENT_DATE AND i.status IN ('belum_bayar', 'terlambat')
@@ -149,7 +156,7 @@ func (r *invoiceRepository) GetDueToday(ctx context.Context) ([]*InvoiceWithCust
 	var invoices []*InvoiceWithCustomer
 	for rows.Next() {
 		var i InvoiceWithCustomer
-		if err := rows.Scan(&i.ID, &i.CustomerID, &i.Jumlah, &i.TanggalTerbit, &i.JatuhTempo, &i.Status, &i.CreatedAt, &i.UpdatedAt, &i.CustomerName); err != nil {
+		if err := rows.Scan(&i.ID, &i.CustomerID, &i.Jumlah, &i.TanggalTerbit, &i.JatuhTempo, &i.Status, &i.CreatedAt, &i.UpdatedAt, &i.CustomerName, &i.KontakTelegram); err != nil {
 			return nil, err
 		}
 		invoices = append(invoices, &i)

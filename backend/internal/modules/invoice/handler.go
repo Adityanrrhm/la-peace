@@ -104,6 +104,20 @@ func (h *InvoiceHandler) UpdateStatus(c *gin.Context) {
 	response.Success(c, resp, nil)
 }
 
+func (h *InvoiceHandler) Delete(c *gin.Context) {
+	id := c.Param("id")
+	err := h.svc.Delete(c.Request.Context(), id)
+	if err != nil {
+		if err.Error() == "invoice not found" {
+			response.Error(c, errors.NewNotFound("Invoice"))
+			return
+		}
+		response.Error(c, errors.NewInternal(err.Error()))
+		return
+	}
+	response.Success(c, gin.H{"deleted": id}, nil)
+}
+
 func (h *InvoiceHandler) GetDueToday(c *gin.Context) {
 	resp, err := h.svc.GetDueToday(c.Request.Context())
 	if err != nil {

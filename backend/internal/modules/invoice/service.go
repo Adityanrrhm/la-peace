@@ -117,6 +117,18 @@ func (s *InvoiceService) UpdateStatus(ctx context.Context, id, status string) (*
 	return s.toResponse(existing, ""), nil
 }
 
+func (s *InvoiceService) Delete(ctx context.Context, id string) error {
+	existing, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if existing == nil {
+		return errors.New("invoice not found")
+	}
+	// ponytail: FK cascade wipes follow_up_logs rows for this invoice — acceptable, logged intent
+	return s.repo.Delete(ctx, id)
+}
+
 func (s *InvoiceService) GetDueToday(ctx context.Context) ([]InvoiceResponse, error) {
 	invoices, err := s.repo.GetDueToday(ctx)
 	if err != nil {
@@ -125,9 +137,16 @@ func (s *InvoiceService) GetDueToday(ctx context.Context) ([]InvoiceResponse, er
 
 	responses := make([]InvoiceResponse, len(invoices))
 	for i, inv := range invoices {
-		responses[i] = *s.toResponse(&inv.Invoice, inv.CustomerName.String)
+		responses[i] = *s.toResponseCustomer(inv)
 	}
 	return responses, nil
+}
+
+// toResponseCustomer fills KontakTelegram (Hermes reads it for Telegram delivery).
+func (s *InvoiceService) toResponseCustomer(i *InvoiceWithCustomer) *InvoiceResponse {
+	resp := s.toResponse(&i.Invoice, i.CustomerName.String)
+	resp.KontakTelegram = i.KontakTelegram.String
+	return resp
 }
 
 func (s *InvoiceService) toResponse(i *Invoice, customerName string) *InvoiceResponse {

@@ -25,6 +25,7 @@ type InvoiceResponse struct {
 	ID             string `json:"id"`
 	CustomerID     string `json:"customer_id"`
 	CustomerName   string `json:"customer_name,omitempty"`
+	KontakTelegram string `json:"kontak_telegram,omitempty"`
 	Jumlah         int64  `json:"jumlah"`
 	TanggalTerbit  string `json:"tanggal_terbit"`
 	JatuhTempo     string `json:"jatuh_tempo"`

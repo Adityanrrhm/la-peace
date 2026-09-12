@@ -15,7 +15,7 @@ import (
 type AuthMode string
 
 const (
-	AuthModeSession     AuthMode = "session"
+	AuthModeSession      AuthMode = "session"
 	AuthModeServiceToken AuthMode = "service_token"
 )
 
@@ -143,6 +143,11 @@ func GetAuthMode(c *gin.Context) (AuthMode, bool) {
 
 func RequireAuth(cfg *config.Config) gin.HandlerFunc {
 	return AuthMiddleware(cfg, AuthModeSession)
+}
+
+// RequireAny accepts dashboard and service token for hermes.
+func RequireAny(cfg *config.Config) gin.HandlerFunc {
+	return AuthMiddleware(cfg, AuthModeSession, AuthModeServiceToken)
 }
 
 func RequireServiceToken(cfg *config.Config) gin.HandlerFunc {
