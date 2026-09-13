@@ -9,10 +9,9 @@ import (
 
 func RegisterRoutes(rg *gin.RouterGroup, handler *FollowUpLogHandler, cfg *config.Config) {
 	followup := rg.Group("/follow-up-logs")
-	followup.Use(middleware.RequireAuth(cfg))
 	{
-		followup.POST("", handler.Create)
-		followup.GET("", handler.List)
-		followup.GET("/invoice/:invoice_id", handler.GetByInvoiceID)
+		followup.POST("", middleware.RequireAuthOrServiceToken(cfg), handler.Create)
+		followup.GET("", middleware.RequireAuth(cfg), handler.List)
+		followup.GET("/invoice/:invoice_id", middleware.RequireAuth(cfg), handler.GetByInvoiceID)
 	}
 }

@@ -149,6 +149,10 @@ func RequireServiceToken(cfg *config.Config) gin.HandlerFunc {
 	return AuthMiddleware(cfg, AuthModeServiceToken)
 }
 
+func RequireAuthOrServiceToken(cfg *config.Config) gin.HandlerFunc {
+	return AuthMiddleware(cfg, AuthModeSession, AuthModeServiceToken)
+}
+
 func OptionalAuth(cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Try service token first
