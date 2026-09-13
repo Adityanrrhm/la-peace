@@ -12,7 +12,7 @@ command -v hermes >/dev/null 2>&1 || {
 }
 
 mkdir -p "$HERMES_DIR/skills"
-cp -R "$HERE/skills/tagira" "$HERMES_DIR/skills/"
+cp -R "$HERE/skills"/* "$HERMES_DIR/skills/"
 cp "$HERE/SOUL.md" "$HERMES_DIR/SOUL.md"
 
 if [ -f "$HERE/.env" ]; then
