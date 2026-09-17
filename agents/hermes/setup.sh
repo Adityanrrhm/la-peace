@@ -17,8 +17,18 @@ cp "$HERE/SOUL.md" "$HERMES_DIR/SOUL.md"
 
 if [ -f "$HERE/.env" ]; then
   cp "$HERE/.env" "$HERMES_DIR/.env"
+elif [ -f "$HERE/.env.example" ]; then
+  if [ ! -f "$HERMES_DIR/.env" ]; then
+    cp "$HERE/.env.example" "$HERMES_DIR/.env"
+    echo "created $HERMES_DIR/.env from .env.example — edit it and fill TAGIRA_SERVICE_TOKEN + telegram values, then re-run setup.sh"
+    exit 0
+  else
+    echo "WARN: $HERMES_DIR/.env exists, keeping it — fill TAGIRA_SERVICE_TOKEN + telegram values, then re-run setup.sh"
+    exit 0
+  fi
 else
-  echo "WARN: no .env here — cp .env.example .env, fill TAGIRA_SERVICE_TOKEN + telegram values"
+  echo "WARN: no .env or .env.example here — fill $HERMES_DIR/.env with TAGIRA_SERVICE_TOKEN + telegram values, then re-run setup.sh"
+  exit 0
 fi
 
 # shellcheck disable=SC1090
