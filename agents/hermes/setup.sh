@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Hermes bootstrap for Tagira (VPS deploy).
-# Ports skill, persona, and daily cron job in one run. Secrets via .env.
+# Ports skill, persona, and daily cron job in one run.
+# .env is created from .env.example and filled interactively (skip on non-tty, keep existing values).
 set -euo pipefail
 
 HERMES_DIR="${HERMES_DIR:-$HOME/.hermes}"
@@ -17,18 +18,28 @@ cp "$HERE/SOUL.md" "$HERMES_DIR/SOUL.md"
 
 if [ -f "$HERE/.env" ]; then
   cp "$HERE/.env" "$HERMES_DIR/.env"
-elif [ -f "$HERE/.env.example" ]; then
-  if [ ! -f "$HERMES_DIR/.env" ]; then
+fi
+if [ ! -f "$HERMES_DIR/.env" ]; then
+  if [ -f "$HERE/.env.example" ]; then
     cp "$HERE/.env.example" "$HERMES_DIR/.env"
-    echo "created $HERMES_DIR/.env from .env.example — edit it and fill TAGIRA_SERVICE_TOKEN + telegram values, then re-run setup.sh"
-    exit 0
   else
-    echo "WARN: $HERMES_DIR/.env exists, keeping it — fill TAGIRA_SERVICE_TOKEN + telegram values, then re-run setup.sh"
-    exit 0
+    : > "$HERMES_DIR/.env"
   fi
+fi
+
+if { [ -t 0 ] || [ "${FORCE_INTERACTIVE:-0}" = 1 ]; } && [ -f "$HERE/.env.example" ]; then
+  TMP="$HERMES_DIR/.env.tmp"
+  : > "$TMP"
+  for KEY in $(grep -E '^[A-Z_][A-Z0-9_]*=' "$HERE/.env.example" | cut -d= -f1); do
+    OLD=$(sed -n "s/^${KEY}=//p" "$HERMES_DIR/.env" | tail -1)
+    read -rp "${KEY} (keep: ${OLD:-<empty>}): " VAL
+    VAL="${VAL:-$OLD}"
+    printf '%s=%s\n' "$KEY" "$VAL" >> "$TMP"
+  done
+  mv "$TMP" "$HERMES_DIR/.env"
+  echo "Wrote $HERMES_DIR/.env"
 else
-  echo "WARN: no .env or .env.example here — fill $HERMES_DIR/.env with TAGIRA_SERVICE_TOKEN + telegram values, then re-run setup.sh"
-  exit 0
+  echo "Non-interactive run (or no .env.example) — keeping existing $HERMES_DIR/.env"
 fi
 
 # shellcheck disable=SC1090
