@@ -9,14 +9,27 @@ APP_DIR="/opt/tagira"
 SERVICE_NAME="tagira-api"
 DB_USER="tagira"
 DB_NAME="tagira"
-DB_PASS=$(openssl rand -base64 18)
-SESSION_SECRET=$(openssl rand -base64 32)
-JWT_SECRET=$(openssl rand -base64 32)
-SERVICE_TOKEN=$(openssl rand -hex 32)
 
 if [[ $EUID -ne 0 ]]; then
   echo "Run as root: sudo bash $0"
   exit 1
+fi
+
+# ── Check existing setup ───────────────────────────────────────────
+EXISTING_SETUP=false
+if [ -f "$APP_DIR/.env" ]; then
+  EXISTING_SETUP=true
+  echo "Existing .env found. Reusing credentials."
+  # Source existing secrets so DB password stays in sync
+  set -a
+  . "$APP_DIR/.env"
+  set +a
+  DB_PASS="$DB_PASSWORD"
+else
+  DB_PASS=$(openssl rand -base64 18)
+  SESSION_SECRET=$(openssl rand -base64 32)
+  JWT_SECRET=$(openssl rand -base64 32)
+  SERVICE_TOKEN=$(openssl rand -hex 32)
 fi
 
 echo "=== Tagira VPS Setup ==="
@@ -47,15 +60,19 @@ systemctl enable --now postgresql
 
 PG_USER_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='${DB_USER}'" 2>/dev/null || true)
 if [ "$PG_USER_EXISTS" = "1" ]; then
-  sudo -u postgres psql -c "ALTER USER ${DB_USER} WITH PASSWORD '${DB_PASS}';" >/dev/null
-  echo "  DB user exists. Password rotated: ${DB_PASS}"
+  if [ "$EXISTING_SETUP" = false ]; then
+    sudo -u postgres psql -c "ALTER USER ${DB_USER} WITH PASSWORD '${DB_PASS}';" >/dev/null
+    echo "  DB user exists. Password rotated."
+  else
+    echo "  DB user exists. Reusing."
+  fi
 else
   sudo -u postgres psql <<EOSQL
 CREATE USER ${DB_USER} WITH PASSWORD '${DB_PASS}';
 CREATE DATABASE ${DB_NAME} OWNER ${DB_USER};
 GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};
 EOSQL
-  echo "  DB user created. Password: ${DB_PASS}"
+  echo "  DB user + database created."
 fi
 
 PG_DB_EXISTS=$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" 2>/dev/null || true)
@@ -67,7 +84,9 @@ else
   echo "  Database exists."
 fi
 
-cat > /etc/postgresql/16/main/conf.d/tagira.conf <<EOF
+# Tune — detect PG version
+PG_VER=$(ls /etc/postgresql/ | head -1)
+cat > "/etc/postgresql/${PG_VER}/main/conf.d/tagira.conf" <<EOF
 shared_buffers = 512MB
 effective_cache_size = 1536MB
 max_connections = 100
@@ -92,7 +111,7 @@ cp -r migrations "$APP_DIR/"
 chown -R tagira:tagira "$APP_DIR"
 
 # .env
-if [ ! -f "$APP_DIR/.env" ]; then
+if [ "$EXISTING_SETUP" = false ]; then
   cat > "$APP_DIR/.env" <<EOF
 APP_ENV=production
 APP_PORT=8080
@@ -155,13 +174,16 @@ systemctl daemon-reload
 systemctl enable "$SERVICE_NAME"
 systemctl restart "$SERVICE_NAME"
 
-sudo -u tagira "$APP_DIR/tagira-api" -migrate
+# Migrate — cd into APP_DIR so .env is found
+sudo -u tagira env HOME="$APP_DIR" bash -c "cd $APP_DIR && $APP_DIR/tagira-api -migrate"
 echo "  Backend running on :8080"
 
 # ── 5. Frontend (static export) ────────────────────────────────────
 echo "[5/5] Building frontend..."
-cd "$(dirname "$0")/../../frontend"
-if [ -f package.json ]; then
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+FRONTEND_DIR="${SCRIPT_DIR}/../../frontend"
+if [ -d "$FRONTEND_DIR" ] && [ -f "$FRONTEND_DIR/package.json" ]; then
+  cd "$FRONTEND_DIR"
   npm install --production=false
   npm run build
   mkdir -p "$APP_DIR/frontend"
@@ -170,7 +192,8 @@ if [ -f package.json ]; then
   chown -R tagira:tagira "$APP_DIR/frontend"
   echo "  Frontend copied to $APP_DIR/frontend"
 else
-  echo "  SKIP: frontend/package.json not found"
+  echo "  SKIP: frontend not found at $FRONTEND_DIR"
+  echo "  Build frontend separately, then copy to $APP_DIR/frontend/"
 fi
 
 # ── Done ───────────────────────────────────────────────────────────
@@ -180,13 +203,14 @@ echo "=== Setup Complete ==="
 echo ""
 echo "Access:          http://${IP}:8080"
 echo ""
-echo "Credentials (SAVE THESE NOW):"
-echo "  DB password:      ${DB_PASS}"
-echo "  SERVICE_TOKEN:    ${SERVICE_TOKEN}"
-echo ""
+if [ "$EXISTING_SETUP" = false ]; then
+  echo "Credentials (SAVE THESE NOW):"
+  echo "  DB password:      ${DB_PASS}"
+  echo "  SERVICE_TOKEN:    ${SERVICE_TOKEN}"
+  echo ""
+fi
 echo "Secrets file:      ${APP_DIR}/.env"
 echo "Health check:      curl http://localhost:8080/health"
 echo "Logs:              journalctl -u ${SERVICE_NAME} -f"
-echo "Smoke test:        bash $(dirname "$0")/smoke.sh"
 echo ""
 echo "Firewall: Open port 8080 if needed: sudo ufw allow 8080/tcp"
