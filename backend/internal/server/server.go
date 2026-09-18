@@ -3,6 +3,9 @@ package server
 import (
 	"context"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -90,10 +93,42 @@ func (s *Server) registerRoutes() {
 	summarySvc := summary.NewSummaryService(summaryRepo)
 	summaryHandler := summary.NewSummaryHandler(summarySvc)
 	summary.RegisterRoutes(api, summaryHandler, s.cfg)
+
+	// Serve frontend static files (production)
+	if s.cfg.FrontendDir != "" {
+		s.serveStatic(s.cfg.FrontendDir)
+	}
 }
 
 func (s *Server) Engine() *gin.Engine {
 	return s.engine
+}
+
+func (s *Server) serveStatic(dir string) {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		s.logger.Warn().Str("dir", dir).Msg("Frontend dir not found, skipping static serving")
+		return
+	}
+
+	s.engine.NoRoute(func(c *gin.Context) {
+		// API requests get 404
+		if strings.HasPrefix(c.Request.URL.Path, "/api/") {
+			c.JSON(404, gin.H{"error": "not found"})
+			return
+		}
+
+		// Try exact file first
+		path := filepath.Join(dir, c.Request.URL.Path)
+		if info, err := os.Stat(path); err == nil && !info.IsDir() {
+			c.File(path)
+			return
+		}
+
+		// SPA fallback — serve index.html for client-side routing
+		c.File(filepath.Join(dir, "index.html"))
+	})
+
+	s.logger.Info().Str("dir", dir).Msg("Serving frontend static files")
 }
 
 func (s *Server) Run(addr string) error {
