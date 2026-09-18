@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+ORIG_DIR="$(pwd)"
+
 # Tagira — Full VPS Setup (idempotent, no Nginx)
 # Usage:
 #   sudo bash setup-vps.sh          # setup/re-setup
@@ -129,7 +131,7 @@ chown tagira:tagira "$APP_DIR"
 
 # ── 4. Build & deploy backend ──────────────────────────────────────
 echo "[4/5] Building backend..."
-cd "$(dirname "$0")/.."
+cd "$ORIG_DIR/$(dirname "$0")/.."
 CGO_ENABLED=0 go build -o "$APP_DIR/tagira-api" cmd/api/main.go
 cp -r migrations "$APP_DIR/"
 chown -R tagira:tagira "$APP_DIR"
@@ -214,19 +216,21 @@ fi
 # ── 5. Frontend ─────────────────────────────────────────────────────
 echo "[5/5] Building frontend..."
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
 # Find frontend source
 FRONTEND_SRC=""
+SCRIPT_DIR="$ORIG_DIR/$(dirname "$0")"
+
+# Walk up from script dir to find a directory containing frontend/
 SEARCH_DIR="$SCRIPT_DIR"
 for i in 1 2 3 4 5; do
+  SEARCH_DIR="$(dirname "$SEARCH_DIR")"
   if [ -d "$SEARCH_DIR/frontend" ] && [ -f "$SEARCH_DIR/frontend/package.json" ]; then
     FRONTEND_SRC="$SEARCH_DIR/frontend"
     break
   fi
-  SEARCH_DIR="$(dirname "$SEARCH_DIR")"
 done
 
+# Fallback: find any frontend/package.json under /root or /home
 if [ -z "$FRONTEND_SRC" ]; then
   FOUND=$(find /root /home -maxdepth 4 -path "*/frontend/package.json" -print -quit 2>/dev/null || true)
   [ -n "$FOUND" ] && FRONTEND_SRC="$(dirname "$FOUND")"
