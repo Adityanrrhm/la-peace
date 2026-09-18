@@ -2,13 +2,18 @@
 set -euo pipefail
 
 # Tagira — Full VPS Setup (idempotent, no Nginx)
-# Usage: sudo bash setup-vps.sh
+# Usage:
+#   sudo bash setup-vps.sh          # setup/re-setup
+#   sudo bash setup-vps.sh --clean  # wipe .env, rotate all secrets, fresh start
 # Access: http://YOUR_IP:8080
 
 APP_DIR="/opt/tagira"
 SERVICE_NAME="tagira-api"
 DB_USER="tagira"
 DB_NAME="tagira"
+CLEAN=false
+
+[[ "${1:-}" == "--clean" ]] && CLEAN=true
 
 if [[ $EUID -ne 0 ]]; then
   echo "Run as root: sudo bash $0"
@@ -19,14 +24,33 @@ fi
 EXISTING_SETUP=false
 if [ -f "$APP_DIR/.env" ]; then
   EXISTING_SETUP=true
-  echo "Existing .env found. Reusing credentials."
-  # Source existing secrets so DB password stays in sync
   set -a
   . "$APP_DIR/.env"
   set +a
+fi
+
+# ── Clean mode: wipe old state ─────────────────────────────────────
+if [ "$CLEAN" = true ]; then
+  echo "=== CLEAN MODE ==="
+  echo "Wiping .env, rotating DB password, fresh start."
+  rm -f "$APP_DIR/.env"
+  EXISTING_SETUP=false
+
+  # Stop old service
+  systemctl stop "$SERVICE_NAME" 2>/dev/null || true
+
+  # Rotate DB password
+  NEW_DB_PASS=$(openssl rand -base64 18 | tr '/+' 'Ab')
+  sudo -u postgres psql -c "ALTER USER ${DB_USER} WITH PASSWORD '${NEW_DB_PASS}';" >/dev/null 2>&1 || true
+  echo "  DB password rotated."
+fi
+
+# Generate or reuse credentials
+if [ "$EXISTING_SETUP" = true ]; then
+  echo "Existing .env found. Reusing credentials."
   DB_PASS="$DB_PASSWORD"
 else
-  DB_PASS=$(openssl rand -base64 18)
+  DB_PASS=$(openssl rand -base64 18 | tr '/+' 'Ab')
   SESSION_SECRET=$(openssl rand -base64 32)
   JWT_SECRET=$(openssl rand -base64 32)
   SERVICE_TOKEN=$(openssl rand -hex 32)
@@ -174,9 +198,18 @@ systemctl daemon-reload
 systemctl enable "$SERVICE_NAME"
 systemctl restart "$SERVICE_NAME"
 
-# Migrate — cd into APP_DIR so .env is found
+# Migrate
 sudo -u tagira env HOME="$APP_DIR" bash -c "cd $APP_DIR && $APP_DIR/tagira-api -migrate"
-echo "  Backend running on :8080"
+
+# ── Health check ───────────────────────────────────────────────────
+echo ""
+echo "Checking backend health..."
+HEALTH=$(curl -sf http://localhost:8080/health 2>/dev/null || true)
+if echo "$HEALTH" | grep -q '"status":"ok"'; then
+  echo "  Backend healthy."
+else
+  echo "  WARN: Backend not responding. Check: journalctl -u ${SERVICE_NAME} -n 20"
+fi
 
 # ── 5. Frontend (static export) ────────────────────────────────────
 echo "[5/5] Building frontend..."
@@ -203,7 +236,7 @@ echo "=== Setup Complete ==="
 echo ""
 echo "Access:          http://${IP}:8080"
 echo ""
-if [ "$EXISTING_SETUP" = false ]; then
+if [ "$EXISTING_SETUP" = false ] || [ "$CLEAN" = true ]; then
   echo "Credentials (SAVE THESE NOW):"
   echo "  DB password:      ${DB_PASS}"
   echo "  SERVICE_TOKEN:    ${SERVICE_TOKEN}"

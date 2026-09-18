@@ -1,6 +1,7 @@
 package config
 
 import (
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -81,7 +82,7 @@ func Load() *Config {
 }
 
 func (c *Config) GetDSN() string {
-	return "postgres://" + c.DBUser + ":" + c.DBPassword + "@" + c.DBHost + ":" + c.DBPort + "/" + c.DBName + "?sslmode=" + c.DBSSLMode
+	return "postgres://" + c.DBUser + ":" + url.QueryEscape(c.DBPassword) + "@" + c.DBHost + ":" + c.DBPort + "/" + c.DBName + "?sslmode=" + c.DBSSLMode
 }
 
 func getEnv(key, defaultValue string) string {
