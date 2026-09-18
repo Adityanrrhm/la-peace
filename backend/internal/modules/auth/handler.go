@@ -27,9 +27,7 @@ func (h *AuthHandler) setSessionCookie(c *gin.Context, token string, maxAge int)
 	sameSite := http.SameSiteLaxMode
 	secure := false
 
-	if h.cfg.AppEnv == "production" {
-		// Di production, aktifkan Secure dan pertahankan Lax (via proxy/same-domain)
-		// Ganti ke SameSiteNoneMode jika backend dan frontend beda domain
+	if h.cfg.AppEnv == "production" && c.Request.TLS != nil {
 		secure = true
 	}
 
