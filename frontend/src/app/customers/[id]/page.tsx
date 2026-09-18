@@ -55,7 +55,7 @@ export default function CustomerDetailPage() {
   const onSubmit = async (data: CustomerFormData) => {
     setSubmitError(null);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1'}/customers/${id}`, {
+      const response = await fetch(`/api/v1/customers/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
