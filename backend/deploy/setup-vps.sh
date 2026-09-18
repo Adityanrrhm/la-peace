@@ -239,7 +239,7 @@ fi
 if [ -n "$FRONTEND_SRC" ]; then
   echo "  Found frontend at: $FRONTEND_SRC"
   cd "$FRONTEND_SRC"
-  npm install --production=false
+  npm ci
 
   # Build for production
   BACKEND_URL="http://localhost:8080" npm run build
