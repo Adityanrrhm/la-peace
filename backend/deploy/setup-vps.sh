@@ -203,6 +203,16 @@ systemctl restart "$SERVICE_NAME"
 # Migrate
 sudo -u tagira env HOME="$APP_DIR" bash -c "cd $APP_DIR && $APP_DIR/tagira-api -migrate"
 
+# Seed — only if users table is empty
+USER_COUNT=$(sudo -u postgres psql -tAc "SELECT COUNT(*) FROM ${DB_NAME}.users" 2>/dev/null || echo "0")
+if [ "$USER_COUNT" = "0" ]; then
+  echo "  Seeding database..."
+  sudo -u postgres psql -d "$DB_NAME" -f "$APP_DIR/migrations/seed_dummy.sql" >/dev/null
+  echo "  Seed complete. Login: owner@tagira.dev / tagira123"
+else
+  echo "  Database has ${USER_COUNT} users. Skipping seed."
+fi
+
 # ── Health check ───────────────────────────────────────────────────
 echo ""
 echo "Checking backend health..."
