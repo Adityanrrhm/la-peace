@@ -331,6 +331,53 @@ sudo chown -R tagira:tagira /opt/tagira/frontend
 
 ---
 
+## Secrets Generation & Management
+
+Semua secret dibuat satu kali, disimpan aman (password manager/vault), **tidak pernah masuk git**. Backend memvalidasi konfigurasi di startup dan saat `-validate`.
+
+| Secret | Format / Panjang | Command | Dipakai di |
+|--------|------------------|---------|------------|
+| `SERVICE_TOKEN` | 64 hex (32 bytes) | `openssl rand -hex 32` | backend `.env` **Wajib sama** dengan hermes `.env` |
+| `SESSION_SECRET` | ≥32 chars | `openssl rand -base64 32` | backend `.env` (session cookie) |
+| `JWT_SECRET` | ≥32 chars | `openssl rand -base64 32` | backend `.env` (JWT signing) |
+| `DB_PASSWORD` | strong | `openssl rand -base64 18` | backend `.env` + user PostgreSQL |
+| `TELEGRAM_BOT_TOKEN` | dari BotFather | — | hermes `.env` |
+| `TELEGRAM_HOME_CHANNEL` | chat id | — | hermes `.env` (cron owner report) |
+| `TELEGRAM_ALLOWED_USERS` | user id, koma | — | hermes `.env` |
+
+### SERVICE_TOKEN (paling sering salah)
+
+Satu token, dua tempat, **byte-match**:
+
+```bash
+H=$(rg '^TAGIRA_SERVICE_TOKEN=.' ~/.hermes/.env | cut -d= -f2)
+B=$(rg '^SERVICE_TOKEN=.' /opt/tagira/.env | cut -d= -f2)
+[ "$H" = "$B" ] && echo MATCH || echo MISMATCH
+curl -s -o /dev/null -w "%{http_code}\n" -H "X-Service-Token: $H" http://localhost:8080/api/v1/summary/daily
+```
+
+- `200` → koneksi Hermes–API sehat
+- `401` → token beda/basi di salah satu tempat
+
+### Rotasi SERVICE_TOKEN
+
+1. Generate baru, tulis ke `/opt/tagira/.env`
+2. Token yang sama ke `~/.hermes/.env`
+3. `sudo systemctl restart tagira-api` + `hermes gateway restart`
+4. Verifikasi `MATCH` + `200` (di atas)
+5. Token lama langsung tidak valid — backend cek equality per request
+
+### SESSION_SECRET & JWT_SECRET
+
+- Signing session cookie (`session_token`) dan JWT dashboard
+- Minimal 32 chars; validasi backend menolak yang pendek atau berisi `password`/`123456`
+- Rotasi hanya saat bocor — konsekuensinya semua user login ulang
+- Cek config: `/opt/tagira/tagira-api -validate`
+
+### Hermes
+
+`agents/hermes/setup.sh` mengisi `.env` secara interaktif (prompt per key) dan membuat cron. `TAGIRA_SERVICE_TOKEN` di `~/.hermes/.env` harus sama persis dengan `SERVICE_TOKEN` backend.
+
 ## 🐳 Docker Deployment (Alternative)
 
 ### Development
