@@ -211,13 +211,12 @@ else
   echo "  WARN: Backend not responding. Check: journalctl -u ${SERVICE_NAME} -n 20"
 fi
 
-# ── 5. Frontend (static export) ────────────────────────────────────
+# ── 5. Frontend ─────────────────────────────────────────────────────
 echo "[5/5] Building frontend..."
-mkdir -p "$APP_DIR/frontend"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Find repo root: walk up from script dir looking for frontend/ or .git
+# Find frontend source
 FRONTEND_SRC=""
 SEARCH_DIR="$SCRIPT_DIR"
 for i in 1 2 3 4 5; do
@@ -228,7 +227,6 @@ for i in 1 2 3 4 5; do
   SEARCH_DIR="$(dirname "$SEARCH_DIR")"
 done
 
-# Fallback: find any frontend/package.json under /root or /home
 if [ -z "$FRONTEND_SRC" ]; then
   FOUND=$(find /root /home -maxdepth 4 -path "*/frontend/package.json" -print -quit 2>/dev/null || true)
   [ -n "$FOUND" ] && FRONTEND_SRC="$(dirname "$FOUND")"
@@ -238,14 +236,43 @@ if [ -n "$FRONTEND_SRC" ]; then
   echo "  Found frontend at: $FRONTEND_SRC"
   cd "$FRONTEND_SRC"
   npm install --production=false
-  npm run build
+
+  # Build for production
+  BACKEND_URL="http://localhost:8080" npm run build
+
+  # Copy to app dir
+  mkdir -p "$APP_DIR/frontend"
   rm -rf "$APP_DIR/frontend"/*
-  cp -r out/* "$APP_DIR/frontend/"
+  cp -r . "$APP_DIR/frontend/"
   chown -R tagira:tagira "$APP_DIR/frontend"
-  echo "  Frontend built and copied."
+
+  # Systemd service for frontend
+  cat > /etc/systemd/system/tagira-frontend.service <<EOF
+[Unit]
+Description=Tagira Frontend
+After=network.target tagira-api.service
+
+[Service]
+Type=simple
+User=tagira
+Group=tagira
+WorkingDirectory=${APP_DIR}/frontend
+ExecStart=$(which npx) next start -p 3000
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+Environment=BACKEND_URL=http://localhost:8080
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  systemctl daemon-reload
+  systemctl enable tagira-frontend
+  systemctl restart tagira-frontend
+  echo "  Frontend running on :3000"
 else
   echo "  ERROR: frontend/package.json not found."
-  echo "  Fix: clone full repo to VPS, or build locally and scp -r out/* root@VPS_IP:/opt/tagira/frontend/"
 fi
 
 # ── Done ───────────────────────────────────────────────────────────
@@ -253,7 +280,8 @@ IP=$(hostname -I | awk '{print $1}')
 echo ""
 echo "=== Setup Complete ==="
 echo ""
-echo "Access:          http://${IP}:8080"
+echo "Frontend:   http://${IP}:3000"
+echo "Backend:    http://${IP}:8080/health"
 echo ""
 if [ "$EXISTING_SETUP" = false ] || [ "$CLEAN" = true ]; then
   echo "Credentials (SAVE THESE NOW):"
@@ -262,7 +290,7 @@ if [ "$EXISTING_SETUP" = false ] || [ "$CLEAN" = true ]; then
   echo ""
 fi
 echo "Secrets file:      ${APP_DIR}/.env"
-echo "Health check:      curl http://localhost:8080/health"
-echo "Logs:              journalctl -u ${SERVICE_NAME} -f"
+echo "Logs backend:      journalctl -u ${SERVICE_NAME} -f"
+echo "Logs frontend:     journalctl -u tagira-frontend -f"
 echo ""
-echo "Firewall: Open port 8080 if needed: sudo ufw allow 8080/tcp"
+echo "Firewall: Open ports 3000 and 8080: sudo ufw allow 3000/tcp && sudo ufw allow 8080/tcp"
