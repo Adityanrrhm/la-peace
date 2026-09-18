@@ -38,9 +38,10 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await login(data.email, data.password);
-      router.push('/');
-      router.refresh();
+      const user = await login(data.email, data.password);
+      if (user) {
+        router.push('/');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login gagal. Silakan coba lagi.');
     } finally {

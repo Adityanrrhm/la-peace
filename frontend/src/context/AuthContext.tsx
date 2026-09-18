@@ -8,7 +8,7 @@ interface AuthContextType {
   user: MeResponse['data'] | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<MeResponse['data'] | undefined>;
   logout: () => Promise<void>;
 }
 
@@ -46,7 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(err.error?.message || 'Login gagal');
     }
 
-    await refetch();
+    const result = await refetch();
+    return result.data;
   }, [refetch]);
 
   const logout = useCallback(async () => {
