@@ -213,20 +213,39 @@ fi
 
 # ── 5. Frontend (static export) ────────────────────────────────────
 echo "[5/5] Building frontend..."
+mkdir -p "$APP_DIR/frontend"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-FRONTEND_DIR="${SCRIPT_DIR}/../../frontend"
-if [ -d "$FRONTEND_DIR" ] && [ -f "$FRONTEND_DIR/package.json" ]; then
-  cd "$FRONTEND_DIR"
+
+# Find repo root: walk up from script dir looking for frontend/ or .git
+FRONTEND_SRC=""
+SEARCH_DIR="$SCRIPT_DIR"
+for i in 1 2 3 4 5; do
+  if [ -d "$SEARCH_DIR/frontend" ] && [ -f "$SEARCH_DIR/frontend/package.json" ]; then
+    FRONTEND_SRC="$SEARCH_DIR/frontend"
+    break
+  fi
+  SEARCH_DIR="$(dirname "$SEARCH_DIR")"
+done
+
+# Fallback: find any frontend/package.json under /root or /home
+if [ -z "$FRONTEND_SRC" ]; then
+  FOUND=$(find /root /home -maxdepth 4 -path "*/frontend/package.json" -print -quit 2>/dev/null || true)
+  [ -n "$FOUND" ] && FRONTEND_SRC="$(dirname "$FOUND")"
+fi
+
+if [ -n "$FRONTEND_SRC" ]; then
+  echo "  Found frontend at: $FRONTEND_SRC"
+  cd "$FRONTEND_SRC"
   npm install --production=false
   npm run build
-  mkdir -p "$APP_DIR/frontend"
   rm -rf "$APP_DIR/frontend"/*
   cp -r out/* "$APP_DIR/frontend/"
   chown -R tagira:tagira "$APP_DIR/frontend"
-  echo "  Frontend copied to $APP_DIR/frontend"
+  echo "  Frontend built and copied."
 else
-  echo "  SKIP: frontend not found at $FRONTEND_DIR"
-  echo "  Build frontend separately, then copy to $APP_DIR/frontend/"
+  echo "  ERROR: frontend/package.json not found."
+  echo "  Fix: clone full repo to VPS, or build locally and scp -r out/* root@VPS_IP:/opt/tagira/frontend/"
 fi
 
 # ── Done ───────────────────────────────────────────────────────────
