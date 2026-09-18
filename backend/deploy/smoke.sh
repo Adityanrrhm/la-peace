@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
-# Tagira API smoke test. Read-only. Exit 0 = all ok, 1 = any fail.
+# Tagira smoke test. Read-only. Exit 0 = all ok, 1 = any fail.
 # Env: TAGIRA_URL, TAGIRA_SERVICE_TOKEN (or SERVICE_TOKEN).
 set -uo pipefail
 
-BASE_URL="${TAGIRA_URL:-http://localhost:8080}"
+BACKEND_URL="${TAGIRA_URL:-http://localhost:8080}"
+FRONTEND_URL="${TAGIRA_FRONTEND_URL:-http://localhost:3000}"
 
+# Load .env from known locations
 HERE="$(cd "$(dirname "$0")" && pwd)"
-[ -f "$HERE/../.env" ] && set -a && . "$HERE/../.env" && set +a
+for env_file in "$HERE/../.env" /opt/tagira/.env; do
+  [ -f "$env_file" ] && set -a && . "$env_file" && set +a && break
+done
 
 TOKEN="${TAGIRA_SERVICE_TOKEN:-${SERVICE_TOKEN:-}}"
 [ -n "$TOKEN" ] || { echo "SMOKE FAIL: no SERVICE_TOKEN set" >&2; exit 1; }
@@ -29,8 +33,18 @@ check() {
   echo "ok: $name"
 }
 
-check api-up "$BASE_URL/health" '"status":"ok"'
-check due-today "$BASE_URL/api/v1/invoices/due-today" '"success":true' -H "X-Service-Token: $TOKEN"
-check summary "$BASE_URL/api/v1/summary/daily" '"success":true' -H "X-Service-Token: $TOKEN"
+# Backend
+check api-up "$BACKEND_URL/health" '"status":"ok"'
+check due-today "$BACKEND_URL/api/v1/invoices/due-today" '"success":true' -H "X-Service-Token: $TOKEN"
+check summary "$BACKEND_URL/api/v1/summary/daily" '"success":true' -H "X-Service-Token: $TOKEN"
+
+# Frontend
+FRONTEND_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 5 "$FRONTEND_URL" 2>/dev/null || echo "000")
+if [ "$FRONTEND_STATUS" = "200" ]; then
+  echo "ok: frontend ($FRONTEND_URL)"
+else
+  echo "SMOKE FAIL: frontend ($FRONTEND_URL) status=$FRONTEND_STATUS" >&2
+  ok=1
+fi
 
 exit "$ok"
