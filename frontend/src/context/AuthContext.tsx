@@ -33,7 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refetch]);
 
   const login = useCallback(async (email: string, password: string) => {
-    // Gunakan path relatif /api/v1 agar melalui proxy Next.js (same-origin)
     const response = await fetch('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -46,8 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(err.error?.message || 'Login gagal');
     }
 
-    const result = await refetch();
-    return result.data;
+    try {
+      const result = await refetch();
+      return result.data;
+    } catch {
+      return undefined;
+    }
   }, [refetch]);
 
   const logout = useCallback(async () => {

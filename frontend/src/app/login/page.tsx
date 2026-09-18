@@ -38,10 +38,8 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const user = await login(data.email, data.password);
-      if (user) {
-        router.push('/');
-      }
+      await login(data.email, data.password);
+      router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login gagal. Silakan coba lagi.');
     } finally {
