@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/context/AuthContext';
 import { Input, Button, Card, CardContent, Label } from '@/components/ui';
+import { cn } from '@/lib/utils';
 
 const loginSchema = z.object({
   email: z.string().email('Format email tidak valid'),
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const { login, isLoading: authLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -89,16 +91,40 @@ export default function LoginPage() {
 
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="••••••••"
-                {...register('password')}
-                disabled={isSubmitting || authLoading}
-                aria-invalid={!!errors.password}
-                aria-describedby={errors.password ? 'password-error' : undefined}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  {...register('password')}
+                  disabled={isSubmitting || authLoading}
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? 'password-error' : undefined}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink/70 transition-colors"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                >
+                  {showPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                      <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+                      <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+                      <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+                      <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+                      <path d="m2 2 20 20" />
+                    </svg>
+                  )}
+                </button>
+              </div>
               {errors.password && (
                 <p id="password-error" className="mt-1 text-sm text-status-overdue" role="alert">
                   {errors.password.message}
