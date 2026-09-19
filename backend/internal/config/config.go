@@ -27,8 +27,9 @@ type Config struct {
 	JWTSecret        string        `mapstructure:"JWT_SECRET" validate:"required,min=32"`
 	JWTExpireHours   int           `mapstructure:"JWT_EXPIRE_HOURS" validate:"min=1"`
 	ServiceToken     string        `mapstructure:"SERVICE_TOKEN" validate:"required"`
-	CORSAllowedOrigins string      `mapstructure:"CORS_ALLOWED_ORIGINS" validate:"required"`
-	CORSAllowCredentials bool      `mapstructure:"CORS_ALLOW_CREDENTIALS"`
+	CORSAllowedOrigins  string `mapstructure:"CORS_ALLOWED_ORIGINS" validate:"required"`
+	CORSAllowCredentials bool   `mapstructure:"CORS_ALLOW_CREDENTIALS"`
+	CookieDomain        string `mapstructure:"COOKIE_DOMAIN"`
 	RateLimitRequests int          `mapstructure:"RATE_LIMIT_REQUESTS" validate:"min=1"`
 	RateLimitWindowSeconds int     `mapstructure:"RATE_LIMIT_WINDOW_SECONDS" validate:"min=1"`
 	FrontendDir      string        `mapstructure:"FRONTEND_DIR"`
@@ -59,8 +60,9 @@ func Load() *Config {
 		JWTSecret:           getEnv("JWT_SECRET", "change_me_32_chars_minimum_length_for_jwt"),
 		JWTExpireHours:      getEnvInt("JWT_EXPIRE_HOURS", 24),
 		ServiceToken:        getEnv("SERVICE_TOKEN", "hermes_service_token_change_me"),
-		CORSAllowedOrigins:  getEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000"),
+		CORSAllowedOrigins:   getEnv("CORS_ALLOWED_ORIGINS", "http://localhost:3000"),
 		CORSAllowCredentials: getEnvBool("CORS_ALLOW_CREDENTIALS", true),
+		CookieDomain:         getEnv("COOKIE_DOMAIN", ""),
 		RateLimitRequests:   getEnvInt("RATE_LIMIT_REQUESTS", 100),
 		RateLimitWindowSeconds: getEnvInt("RATE_LIMIT_WINDOW_SECONDS", 60),
 		FrontendDir:         getEnv("FRONTEND_DIR", ""),

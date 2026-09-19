@@ -36,7 +36,7 @@ func (h *AuthHandler) setSessionCookie(c *gin.Context, token string, maxAge int)
 		Value:    token,
 		MaxAge:   maxAge,
 		Path:     "/",
-		Domain:   "",
+		Domain:   h.cfg.CookieDomain,
 		Secure:   secure,
 		HttpOnly: true,
 		SameSite: sameSite,

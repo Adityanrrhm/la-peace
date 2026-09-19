@@ -41,18 +41,10 @@ export default function CustomerNewPage() {
   const onSubmit = async (data: CustomerFormData) => {
     setSubmitError(null);
     try {
-<<<<<<< HEAD
       await createCustomer.mutateAsync({
         nama: data.nama,
         kontak_telegram: data.kontak_telegram || undefined,
         catatan_perilaku_bayar: data.catatan_perilaku_bayar || undefined,
-=======
-      const response = await fetch('/api/v1/customers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
->>>>>>> b26fb2d9e1ae2e15d187c9b9310cd23d3320eb3b
       });
 
       router.push('/customers');
