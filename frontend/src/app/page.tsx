@@ -224,7 +224,7 @@ export default function DashboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm" role="table">
                 <thead>
-                  <tr className="border-b border-border-hairline bg-ink/[0.02]">
+                  <tr className="border-b border-border-hairline bg-white/50 dark:bg-ink/5">
                     <TableHeader sortBy="customer_name" currentSortBy={sortBy} currentSortDir={sortDir} onSort={handleSort} align="left">
                       Customer
                     </TableHeader>
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                     <TableHeader sortBy="status" currentSortBy={sortBy} currentSortDir={sortDir} onSort={handleSort} align="left">
                       Status
                     </TableHeader>
-                    <th className="px-4 py-3 text-left font-sans font-medium text-ink/70 w-32 border-b border-border-hairline bg-ink/[0.02]"></th>
+                    <th className="px-4 py-3 text-left font-sans font-medium text-ink/70 w-32 border-b border-border-hairline bg-white/50 dark:bg-ink/10"></th>
                   </tr>
                 </thead>
                 <tbody>
