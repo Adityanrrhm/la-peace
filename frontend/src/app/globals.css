@@ -61,3 +61,38 @@
     font-family: var(--font-sans);
   }
 }
+
+/* Floating Input */
+.floating-input {
+  position: relative;
+}
+
+.floating-input__input {
+  position: relative;
+  z-index: 1;
+}
+
+.floating-input__label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0 0.5rem;
+  color: var(--color-ink);
+  opacity: 0.5;
+  cursor: text;
+  pointer-events: none;
+  transition: top 200ms ease-in, left 200ms ease-in, font-size 200ms ease-in, opacity 200ms ease-in, transform 200ms ease-in, color 0s step-end;
+  background-color: var(--color-bg-base);
+  font-size: 0.875rem;
+  z-index: 2;
+}
+
+.floating-input__input:focus ~ .floating-input__label,
+.floating-input__input:not(:placeholder-shown) ~ .floating-input__label {
+  top: 0;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  left: 0.8rem;
+  opacity: 1;
+}

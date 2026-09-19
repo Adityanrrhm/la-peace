@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/context/AuthContext';
-import { Input, Button, Card, CardContent, Label } from '@/components/ui';
+import { Input, FloatingInput, Button, Card, CardContent, Label } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 const loginSchema = z.object({
@@ -126,12 +126,11 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
+              <FloatingInput
                 id="email"
                 type="email"
+                label="Email"
                 autoComplete="email"
-                placeholder="email@contoh.com"
                 {...register('email')}
                 disabled={isSubmitting || authLoading}
                 aria-invalid={!!errors.email}
@@ -145,13 +144,12 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Input
+                <FloatingInput
                   id="password"
                   type={showPassword ? 'text' : 'password'}
+                  label="Password"
                   autoComplete="current-password"
-                  placeholder="••••••••"
                   {...register('password')}
                   disabled={isSubmitting || authLoading}
                   aria-invalid={!!errors.password}

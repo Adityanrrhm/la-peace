@@ -1,4 +1,5 @@
 export { Input } from './Input';
+export { FloatingInput } from './FloatingInput';
 export { Button } from './Button';
 export { Card, CardHeader, CardContent } from './Card';
 export { Label } from './Label';
