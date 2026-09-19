@@ -24,6 +24,7 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
             className
           )}
           placeholder=" "
+          spellCheck={false}
           {...props}
         />
         <label className="floating-input__label">
