@@ -50,9 +50,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-base px-4">
-      <Card className="w-full max-w-md">
-        <CardContent className="p-6 sm:p-8">
+    <div className="h-screen flex overflow-hidden bg-bg-base">
+      {/* Left */}
+      <div className="hidden lg:flex lg:w-1/2 bg-bg-base items-center justify-center p-4">
+        <img
+          src="/day.png"
+          alt=""
+          className="w-full h-full object-cover rounded-2xl"
+        />
+      </div>
+
+      {/* Right */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-ink mb-2">
               Tagira
@@ -145,8 +155,8 @@ export default function LoginPage() {
           <p className="mt-6 text-center text-xs text-ink/50">
             Tagira v1.0 — Dashboard Piutang UMKM
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
