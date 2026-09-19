@@ -3,13 +3,22 @@
 @theme {
   --color-bg-base: #FAF9F6;
   --color-ink: #1C1B19;
-  --color-accent-stamp: #8A6D3B;
+  --color-accent-stamp: #A3835D;
   --color-status-overdue: #B23A3A;
   --color-status-paid: #3D6B4F;
   --color-border-hairline: #DDD8CC;
 
   --font-serif: "Fraunces", "Source Serif 4", serif;
   --font-sans: "Inter", "IBM Plex Sans", sans-serif;
+}
+
+.dark {
+  --color-bg-base: #1A1918;
+  --color-ink: #E8E6E1;
+  --color-accent-stamp: #6C3C14;
+  --color-status-overdue: #E85D5D;
+  --color-status-paid: #5DA87A;
+  --color-border-hairline: #3A3835;
 }
 
 @layer base {

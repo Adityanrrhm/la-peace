@@ -29,7 +29,7 @@ export function TableHeader({
     <th
       className={cn(
         'px-4 py-3 font-sans font-medium text-ink/70',
-        'border-b border-border-hairline bg-white/50',
+        'border-b border-border-hairline bg-white/50 dark:bg-ink/5',
         'transition-colors duration-150',
         align === 'right' && 'text-right',
         align === 'center' && 'text-center',

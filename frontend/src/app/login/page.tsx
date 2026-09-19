@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +22,21 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      setIsDark(true);
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  };
 
   const {
     register,
@@ -52,16 +67,46 @@ export default function LoginPage() {
   return (
     <div className="h-screen flex overflow-hidden bg-bg-base">
       {/* Left */}
-      <div className="hidden lg:flex lg:w-1/2 bg-bg-base items-center justify-center p-4">
-        <img
-          src="/day.png"
-          alt=""
-          className="w-full h-full object-cover rounded-2xl"
-        />
+      <div className="hidden lg:block lg:w-1/2 bg-bg-base p-4 relative">
+        <div className="relative w-full h-full overflow-hidden rounded-2xl">
+          <img
+            src="/day.png"
+            alt=""
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-400 ${isDark ? 'opacity-0' : 'opacity-100'}`}
+          />
+          <img
+            src="/night.png"
+            alt=""
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-400 ${isDark ? 'opacity-100' : 'opacity-0'}`}
+          />
+        </div>
       </div>
 
       {/* Right */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12">
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 relative">
+        <button
+          onClick={toggleTheme}
+          className="absolute top-4 right-4 p-2 text-ink/40 hover:text-ink/70 transition-colors"
+          aria-label={isDark ? 'Mode terang' : 'Mode gelap'}
+        >
+          {isDark ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2"/>
+              <path d="M12 20v2"/>
+              <path d="m4.93 4.93 1.41 1.41"/>
+              <path d="m17.66 17.66 1.41 1.41"/>
+              <path d="M2 12h2"/>
+              <path d="M20 12h2"/>
+              <path d="m6.34 17.66-1.41 1.41"/>
+              <path d="m19.07 4.93-1.41 1.41"/>
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            </svg>
+          )}
+        </button>
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-ink mb-2">

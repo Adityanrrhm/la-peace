@@ -14,7 +14,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     
     const variantStyles: Record<NonNullable<ButtonProps['variant']>, string> = {
       primary: 'bg-accent-stamp text-white hover:bg-accent-stamp/90 active:bg-accent-stamp border-0',
-      secondary: 'bg-white text-ink border border-border-hairline hover:bg-ink/5 active:bg-ink/10',
+      secondary: 'bg-white dark:bg-ink/10 text-ink border border-border-hairline hover:bg-ink/5 active:bg-ink/10',
       danger: 'bg-status-overdue text-white hover:bg-status-overdue/90 active:bg-status-overdue border-0',
       ghost: 'text-ink hover:bg-ink/5 active:bg-ink/10 border-0',
     };

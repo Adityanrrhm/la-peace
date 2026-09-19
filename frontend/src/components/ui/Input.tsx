@@ -9,7 +9,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
       <input
         type={type}
         className={cn(
-          'w-full px-3 py-2 text-sm font-sans text-ink bg-white',
+          'w-full px-3 py-2 text-sm font-sans text-ink bg-white dark:bg-ink/10',
           'border border-border-hairline',
           'placeholder:text-ink/40',
           'focus:outline-none focus:ring-2 focus:ring-accent-stamp/30 focus:border-accent-stamp',
