@@ -110,7 +110,7 @@ export default function LoginPage() {
 
       {/* Right */}
       <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 relative">
-          <span className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 text-lg font-mono text-ink/60">
+          <span className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-2 text-lg font-serif text-ink/60">
           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
             <circle cx="12" cy="12" r="10"/>
             <path d="M12 2a7 7 0 1 0 10 10"/>
@@ -142,10 +142,10 @@ export default function LoginPage() {
         </button>
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-ink mb-2">
+            <h1 className="font-serif text-2xl sm:text-3xl  text-ink mb-2">
               {greeting}
             </h1>
-            <p className="text-sm text-ink/60">Masukkan email dan password kamu untuk melanjutkan</p>
+            <p className="font-sans text-sm text-ink/60">Masukkan email dan password kamu untuk melanjutkan</p>
           </div>
 
           {error && (
@@ -168,9 +168,10 @@ export default function LoginPage() {
                 disabled={isSubmitting || authLoading}
                 aria-invalid={!!errors.email}
                 aria-describedby={errors.email ? 'email-error' : undefined}
+                className="pr-10 font-mono"
               />
               {errors.email && (
-                <p id="email-error" className="mt-1 text-sm text-status-overdue" role="alert">
+                <p id="email-error" className="mt-1 text-sm text-status-overdue font-mono" role="alert">
                   {errors.email.message}
                 </p>
               )}
@@ -187,7 +188,7 @@ export default function LoginPage() {
                   disabled={isSubmitting || authLoading}
                   aria-invalid={!!errors.password}
                   aria-describedby={errors.password ? 'password-error' : undefined}
-                  className="pr-10"
+                  className="pr-10 font-mono"
                 />
                 <button
                   type="button"
@@ -212,7 +213,7 @@ export default function LoginPage() {
                 </button>
               </div>
               {errors.password && (
-                <p id="password-error" className="mt-1 text-sm text-status-overdue" role="alert">
+                <p id="password-error" className="mt-1 text-sm text-status-overdue font-mono" role="alert">
                   {errors.password.message}
                 </p>
               )}
@@ -220,7 +221,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full font-sans"
               size="lg"
               disabled={isSubmitting || authLoading}
             >
