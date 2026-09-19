@@ -16,6 +16,26 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+const greetings: Record<string, string[]> = {
+  morning: ['Good morning stranger', 'Rise and shine', 'Coffee first, then what\'s on your mind?', 'New day, new prompt', 'How\'s your morning going?', 'Hope you slept well', 'Ready to dive in?, stranger'],
+  noon: ['Good afternoon stranger', 'Back at it, stranger', 'Midday check-in, what\'s next?', 'Still going strong?', 'How\'s the day treating you?', 'Lunch break or power through?'],
+  evening: ['Good evening stranger', 'How was your day?, stranger', 'Wrapping up or just getting started?', 'Evening mode: on', 'What\'s on your mind tonight?', 'Hope the day treated you well'],
+  night: ['Still up?, stranger', 'Late-night session?, stranger', 'What\'s keeping you up?', 'Night shift mode', 'Can\'t sleep, or just can\'t stop?', 'Burning the midnight oil?'],
+  midnight: ['Hello, night owl', 'The 3 a.m. club', 'Everyone else is asleep, what\'s the plan?', 'Insomnia mode: activated', 'Quiet hours, but you\'re here stranger', 'The world is asleep, what are you thinking?'],
+};
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  let period: string;
+  if (hour >= 6 && hour < 12) period = 'morning';
+  else if (hour >= 12 && hour < 17) period = 'noon';
+  else if (hour >= 17 && hour < 21) period = 'evening';
+  else if (hour >= 21 || hour < 24) period = 'night';
+  else period = 'midnight';
+  const list = greetings[period];
+  return list[Math.floor(Math.random() * list.length)];
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoading: authLoading } = useAuth();
@@ -23,6 +43,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [greeting, setGreeting] = useState('Welcome back');
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -33,6 +54,7 @@ export default function LoginPage() {
     apply(mq.matches);
     const handler = (e: MediaQueryListEvent) => apply(e.matches);
     mq.addEventListener('change', handler);
+    setGreeting(getGreeting());
     return () => mq.removeEventListener('change', handler);
   }, []);
 
@@ -121,7 +143,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-ink mb-2">
-              Selamat datang kembali
+              {greeting}
             </h1>
             <p className="text-sm text-ink/60">Masukkan email dan password kamu untuk melanjutkan</p>
           </div>
