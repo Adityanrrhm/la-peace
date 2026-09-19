@@ -15,6 +15,12 @@ DB_USER="tagira"
 DB_NAME="tagira"
 CLEAN=false
 
+# Auto-detect VPS IP for cookie/CORS config
+VPS_IP=$(hostname -I | awk '{print $1}')
+COOKIE_DOMAIN="$VPS_IP"
+CORS_ORIGIN="http://$VPS_IP:3000"
+BACKEND_URL="http://$VPS_IP:8080"
+
 [[ "${1:-}" == "--clean" ]] && CLEAN=true
 
 if [[ $EUID -ne 0 ]]; then
@@ -158,8 +164,9 @@ JWT_SECRET=${JWT_SECRET}
 JWT_EXPIRE_HOURS=24
 SERVICE_TOKEN=${SERVICE_TOKEN}
 
-CORS_ALLOWED_ORIGINS=*
+CORS_ALLOWED_ORIGINS=${CORS_ORIGIN}
 CORS_ALLOW_CREDENTIALS=true
+COOKIE_DOMAIN=${COOKIE_DOMAIN}
 
 RATE_LIMIT_REQUESTS=100
 RATE_LIMIT_WINDOW_SECONDS=60
@@ -173,7 +180,19 @@ EOF
   chmod 600 "$APP_DIR/.env"
   echo "  .env created."
 else
-  echo "  .env exists. Skipping."
+  echo "  .env exists. Ensuring COOKIE_DOMAIN and CORS_ALLOWED_ORIGINS are correct..."
+  # Update or append COOKIE_DOMAIN
+  if grep -q "^COOKIE_DOMAIN=" "$APP_DIR/.env"; then
+    sed -i "s|^COOKIE_DOMAIN=.*|COOKIE_DOMAIN=${COOKIE_DOMAIN}|" "$APP_DIR/.env"
+  else
+    echo "COOKIE_DOMAIN=${COOKIE_DOMAIN}" >> "$APP_DIR/.env"
+  fi
+  # Update or append CORS_ALLOWED_ORIGINS
+  if grep -q "^CORS_ALLOWED_ORIGINS=" "$APP_DIR/.env"; then
+    sed -i "s|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=${CORS_ORIGIN}|" "$APP_DIR/.env"
+  else
+    echo "CORS_ALLOWED_ORIGINS=${CORS_ORIGIN}" >> "$APP_DIR/.env"
+  fi
 fi
 
 # Systemd
