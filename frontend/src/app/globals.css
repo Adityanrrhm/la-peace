@@ -1,5 +1,149 @@
 @import "tailwindcss";
 
+/* Anthropic Fonts */
+@font-face {
+  font-family: 'AnthropicSans';
+  src: url('/AnthropicSans/AnthropicSans-Display-Regular-Static.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSans';
+  src: url('/AnthropicSans/AnthropicSans-Display-Medium-Static.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSans';
+  src: url('/AnthropicSans/AnthropicSans-Display-Semibold-Static.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSans';
+  src: url('/AnthropicSans/AnthropicSans-Display-Bold-Static.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSans';
+  src: url('/AnthropicSans/AnthropicSans-Display-Extrabold-Static.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSans';
+  src: url('/AnthropicSans/AnthropicSans-Display-RegularItalic-Static.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSans';
+  src: url('/AnthropicSans/AnthropicSans-Display-MediumItalic-Static.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSans';
+  src: url('/AnthropicSans/AnthropicSans-Display-BoldItalic-Static.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSans';
+  src: url('/AnthropicSans/AnthropicSans-Display-ExtraboldItalic-Static.otf') format('opentype');
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnthropicSerif';
+  src: url('/AnthropicSerif/AnthropicSerif-Display-Regular-Static.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSerif';
+  src: url('/AnthropicSerif/AnthropicSerif-Display-Medium-Static.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSerif';
+  src: url('/AnthropicSerif/AnthropicSerif-Display-Semibold-Static.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSerif';
+  src: url('/AnthropicSerif/AnthropicSerif-Display-Bold-Static.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSerif';
+  src: url('/AnthropicSerif/AnthropicSerif-Display-Extrabold-Static.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSerif';
+  src: url('/AnthropicSerif/AnthropicSerif-Display-RegularItalic-Static.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSerif';
+  src: url('/AnthropicSerif/AnthropicSerif-Display-MediumItalic-Static.otf') format('opentype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSerif';
+  src: url('/AnthropicSerif/AnthropicSerif-Display-BoldItalic-Static.otf') format('opentype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicSerif';
+  src: url('/AnthropicSerif/AnthropicSerif-Display-ExtraboldItalic-Static.otf') format('opentype');
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnthropicMono';
+  src: url('/AnthropicMono/Anthropic Mono Web.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AnthropicMono';
+  src: url('/AnthropicMono/Anthropic Mono Web Regular Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 @theme {
   --color-bg-base: #FAF9F6;
   --color-ink: #1C1B19;
@@ -8,8 +152,9 @@
   --color-status-paid: #3D6B4F;
   --color-border-hairline: #DDD8CC;
 
-  --font-serif: "Fraunces", "Source Serif 4", serif;
-  --font-sans: "Inter", "IBM Plex Sans", sans-serif;
+  --font-serif: "AnthropicSerif", "Fraunces", "Source Serif 4", serif;
+  --font-sans: "AnthropicSans", "Inter", "IBM Plex Sans", sans-serif;
+  --font-mono: "AnthropicMono", ui-monospace, monospace;
 }
 
 .dark {
@@ -59,6 +204,10 @@
 
   .font-sans {
     font-family: var(--font-sans);
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
   }
 }
 
