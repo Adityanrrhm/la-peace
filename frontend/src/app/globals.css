@@ -62,6 +62,15 @@
   }
 }
 
+/* kill autofill styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  transition: background-color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: var(--color-ink);
+}
+
 /* Floating Input */
 .floating-input {
   position: relative;
