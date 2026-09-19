@@ -1,14 +1,15 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
-import { useMe } from '@/hooks/useApi';
+import { useQueryClient } from '@tanstack/react-query';
+import { useMe, queryKeys } from '@/hooks/useApi';
 import type { MeResponse } from '@/types/api';
 
 interface AuthContextType {
   user: MeResponse['data'] | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<MeResponse['data'] | undefined>;
   logout: () => Promise<void>;
 }
 
@@ -16,15 +17,19 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
-  const { data: user, isLoading, error, refetch } = useMe();
+  const [manualUser, setManualUser] = useState<MeResponse['data'] | null>(null);
+  const { data: meUser, isLoading, error, refetch } = useMe();
+  const queryClient = useQueryClient();
+
+  const user = manualUser ?? meUser ?? null;
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
   useEffect(() => {
-    // Listen for unauthorized events from API interceptor
     const handleUnauthorized = () => {
+      setManualUser(null);
       refetch();
     };
 
@@ -33,7 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refetch]);
 
   const login = useCallback(async (email: string, password: string) => {
-    // Gunakan path relatif /api/v1 agar melalui proxy Next.js (same-origin)
     const response = await fetch('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -46,23 +50,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(err.error?.message || 'Login gagal');
     }
 
-    await refetch();
-  }, [refetch]);
+    const result = await response.json();
+    const userData = result.data?.user;
+    if (userData) {
+      setManualUser(userData);
+      queryClient.setQueryData(queryKeys.auth.me, userData);
+    }
+    return userData;
+  }, [queryClient]);
 
   const logout = useCallback(async () => {
     try {
-      // Hapus cookie di backend — Set-Cookie dengan MaxAge=0
       await fetch('/api/v1/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });
     } catch {
-      // Lanjutkan meskipun request gagal
+      // continue even if request fails
     } finally {
-      // Invalidate query agar useMe() kembali null
-      refetch();
+      setManualUser(null);
+      queryClient.setQueryData(queryKeys.auth.me, null);
     }
-  }, [refetch]);
+  }, [queryClient]);
 
   if (!isHydrated) {
     return (
@@ -75,8 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user: user ?? null,
-        isLoading: isLoading && !error,
+        user,
+        isLoading: isLoading && !error && !manualUser,
         isAuthenticated: !!user && !error,
         login,
         logout,

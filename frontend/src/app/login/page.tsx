@@ -40,7 +40,6 @@ export default function LoginPage() {
     try {
       await login(data.email, data.password);
       router.push('/');
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login gagal. Silakan coba lagi.');
     } finally {

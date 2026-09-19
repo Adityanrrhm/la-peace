@@ -1,6 +1,7 @@
 package config
 
 import (
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -30,6 +31,7 @@ type Config struct {
 	CORSAllowCredentials bool      `mapstructure:"CORS_ALLOW_CREDENTIALS"`
 	RateLimitRequests int          `mapstructure:"RATE_LIMIT_REQUESTS" validate:"min=1"`
 	RateLimitWindowSeconds int     `mapstructure:"RATE_LIMIT_WINDOW_SECONDS" validate:"min=1"`
+	FrontendDir      string        `mapstructure:"FRONTEND_DIR"`
 	LogFormat        string        `mapstructure:"LOG_FORMAT" validate:"oneof=json console"`
 	LogLevel         string        `mapstructure:"LOG_LEVEL" validate:"oneof=debug info warn error"`
 	WIBLocation      *time.Location
@@ -61,6 +63,7 @@ func Load() *Config {
 		CORSAllowCredentials: getEnvBool("CORS_ALLOW_CREDENTIALS", true),
 		RateLimitRequests:   getEnvInt("RATE_LIMIT_REQUESTS", 100),
 		RateLimitWindowSeconds: getEnvInt("RATE_LIMIT_WINDOW_SECONDS", 60),
+		FrontendDir:         getEnv("FRONTEND_DIR", ""),
 		LogFormat:           getEnv("LOG_FORMAT", "console"),
 		LogLevel:            getEnv("LOG_LEVEL", "info"),
 	}
@@ -79,7 +82,7 @@ func Load() *Config {
 }
 
 func (c *Config) GetDSN() string {
-	return "postgres://" + c.DBUser + ":" + c.DBPassword + "@" + c.DBHost + ":" + c.DBPort + "/" + c.DBName + "?sslmode=" + c.DBSSLMode
+	return "postgres://" + c.DBUser + ":" + url.QueryEscape(c.DBPassword) + "@" + c.DBHost + ":" + c.DBPort + "/" + c.DBName + "?sslmode=" + c.DBSSLMode
 }
 
 func getEnv(key, defaultValue string) string {

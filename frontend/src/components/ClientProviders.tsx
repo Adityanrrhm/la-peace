@@ -34,14 +34,26 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [hydrated, setHydrated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && pathname !== '/login') {
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (hydrated && !isLoading) {
+      setAuthChecked(true);
+    }
+  }, [isLoading, hydrated]);
+
+  useEffect(() => {
+    if (authChecked && !isAuthenticated && pathname !== '/login') {
       router.push('/login');
     }
-  }, [isAuthenticated, isLoading, pathname, router]);
+  }, [isAuthenticated, authChecked, pathname, router]);
 
-  if (isLoading) {
+  if (!hydrated || !authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg-base">
         <div className="animate-pulse text-ink/50">Memuat...</div>
