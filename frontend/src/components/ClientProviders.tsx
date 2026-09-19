@@ -12,8 +12,9 @@ function Providers({ children }: { children: React.ReactNode }) {
     defaultOptions: {
       queries: {
         staleTime: 1000 * 60 * 5, // 5 minutes
+        gcTime: 0, // Don't cache after unmount - forces fresh fetch on refresh
         retry: 1,
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: true, // Refetch on window focus/refresh
       },
     },
   }));
