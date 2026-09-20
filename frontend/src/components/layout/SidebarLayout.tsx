@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { LayoutDashboard, Users, ClipboardList } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
@@ -126,14 +126,16 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
                 <Link href="/" className="transition-colors hover:text-foreground text-sm">Dashboard</Link>
               </BreadcrumbItem>
               {breadcrumbs.map((crumb) => (
-                <BreadcrumbItem key={crumb.href}>
+                <React.Fragment key={crumb.href}>
                   <BreadcrumbSeparator />
-                  {crumb.isLast ? (
-                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                  ) : (
-                    <Link href={crumb.href} className="transition-colors hover:text-foreground text-sm">{crumb.label}</Link>
-                  )}
-                </BreadcrumbItem>
+                  <BreadcrumbItem>
+                    {crumb.isLast ? (
+                      <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                    ) : (
+                      <Link href={crumb.href} className="transition-colors hover:text-foreground text-sm">{crumb.label}</Link>
+                    )}
+                  </BreadcrumbItem>
+                </React.Fragment>
               ))}
             </BreadcrumbList>
           </Breadcrumb>
