@@ -50,7 +50,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
                   isActive={pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))}
                   tooltip={item.name}
                 >
-                  <Link href={item.href} className="flex items-center gap-2">
+                  <Link href={item.href} className="flex w-full items-center gap-2">
                     <item.icon className="size-4" />
                     <span>{item.name}</span>
                   </Link>
@@ -63,7 +63,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Settings">
-                <Link href="/settings" className="flex items-center gap-2">
+                <Link href="/settings" className="flex w-full items-center gap-2">
                   <Settings className="size-4" />
                   <span>Settings</span>
                 </Link>
