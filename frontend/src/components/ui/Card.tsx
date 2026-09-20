@@ -13,7 +13,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         className={cn(
 
-          variant === 'default' && 'border border-border-hairline',
+          variant === 'default' && 'border border-border-hairline rounded-lg',
           className
         )}
         ref={ref}
