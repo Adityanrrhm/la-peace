@@ -17,7 +17,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo } from 'react';
 import { LayoutDashboard, Users, ClipboardList } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -124,9 +124,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/">Dashboard</Link>
-                </BreadcrumbLink>
+                <Link href="/" className="transition-colors hover:text-foreground text-sm">Dashboard</Link>
               </BreadcrumbItem>
               {breadcrumbs.map((crumb) => (
                 <BreadcrumbItem key={crumb.href}>
@@ -134,9 +132,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
                   {crumb.isLast ? (
                     <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                   ) : (
-                    <BreadcrumbLink asChild>
-                      <Link href={crumb.href}>{crumb.label}</Link>
-                    </BreadcrumbLink>
+                    <Link href={crumb.href} className="transition-colors hover:text-foreground text-sm">{crumb.label}</Link>
                   )}
                 </BreadcrumbItem>
               ))}
