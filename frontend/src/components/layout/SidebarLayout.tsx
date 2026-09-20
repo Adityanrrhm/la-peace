@@ -14,9 +14,10 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { LayoutDashboard, Users, ClipboardList } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -47,6 +48,23 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
     setIsDark(next);
     document.documentElement.classList.toggle('dark', next);
   };
+
+  const breadcrumbs = useMemo(() => {
+    const segments = pathname.split('/').filter(Boolean);
+    const map: Record<string, string> = {
+      '': 'Dashboard',
+      customers: 'Customer',
+      summary: 'Ringkasan',
+      invoices: 'Invoice',
+      new: 'Baru',
+      edit: 'Edit',
+    };
+    return segments.map((seg, i) => ({
+      label: map[seg] || seg,
+      href: '/' + segments.slice(0, i + 1).join('/'),
+      isLast: i === segments.length - 1,
+    }));
+  }, [pathname]);
 
   return (
     <SidebarProvider>
@@ -102,7 +120,29 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarRail />
       <SidebarInset>
-        <header className="border-b border-border-hairline bg-bg-base/50 backdrop-blur-xl sticky top-0 z-10 px-4 py-2 flex items-center justify-end gap-3">
+        <header className="border-b border-border-hairline bg-bg-base/50 backdrop-blur-xl sticky top-0 z-10 px-4 py-2 flex items-center justify-between gap-3">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">Dashboard</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              {breadcrumbs.map((crumb) => (
+                <BreadcrumbItem key={crumb.href}>
+                  <BreadcrumbSeparator />
+                  {crumb.isLast ? (
+                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink asChild>
+                      <Link href={crumb.href}>{crumb.label}</Link>
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+              ))}
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className="flex items-center gap-3">
           <span className="text-sm text-ink/70 hidden md:block">{user?.email}</span>
           <button
             onClick={toggleTheme}
@@ -123,6 +163,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
               </svg>
             )}
           </button>
+          </div>
         </header>
         {children}
       </SidebarInset>
