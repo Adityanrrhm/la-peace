@@ -87,7 +87,7 @@ export default function InvoiceEditPage() {
   if (!invoice) {
     return (
       <div className="min-h-screen bg-bg-base flex items-center justify-center px-4">
-        <Card className="max-w-md">
+        <Card>
           <CardContent className="p-6 text-center">
             <h2 className="font-serif text-xl font-bold text-ink mb-2">Invoice tidak ditemukan</h2>
             <Link href="/">
@@ -103,7 +103,7 @@ export default function InvoiceEditPage() {
 
   return (
     <DashboardLayout>
-      <main className="max-w-2xl mx-auto px-4 py-6">
+      <main className="px-4 py-6">
         <Card>
           <CardContent className="p-4 sm:p-6">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>

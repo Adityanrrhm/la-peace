@@ -82,7 +82,7 @@ export default function InvoiceDetailPage() {
   if (invoiceError || !invoice) {
     return (
       <div className="min-h-screen bg-bg-base flex items-center justify-center px-4">
-        <Card className="max-w-md">
+        <Card>
           <CardContent className="p-6 text-center">
             <h2 className="font-serif text-xl font-bold text-ink mb-2">Invoice tidak ditemukan</h2>
             <p className="text-ink/60 mb-4">Invoice yang Anda cari tidak ada atau telah dihapus.</p>
@@ -100,7 +100,7 @@ export default function InvoiceDetailPage() {
 
   return (
     <DashboardLayout>
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="px-4 py-6">
         {/* Info Grid */}
         <section className="mb-6" aria-labelledby="info-heading">
           <h2 id="info-heading" className="sr-only">Informasi Invoice</h2>

@@ -80,7 +80,7 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="px-4 py-6">
         {/* Ringkasan Harian */}
         <section className="mb-6" aria-labelledby="ringkasan-heading">
           <Card>

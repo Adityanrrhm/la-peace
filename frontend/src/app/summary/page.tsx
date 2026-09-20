@@ -11,48 +11,53 @@ export default function SummaryPage() {
 
   return (
     <DashboardLayout>
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="px-4 py-6">
         {error && (
           <div className="mb-6 p-4 text-sm text-status-overdue bg-status-overdue/10 border border-status-overdue/20 rounded" role="alert">
             Gagal memuat ringkasan: {error instanceof Error ? error.message : 'Kesalahan tidak diketahui'}
           </div>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-          {/* Total Belum Tertagih - Hero */}
-          <Card className="lg:col-span-2">
-            <CardContent className="p-4 sm:p-6">
-              <p className="text-sm text-ink/60 mb-1">Total belum tertagih</p>
-              <p className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-status-overdue">
-                {summary ? formatCurrency(summary.total_belum) : isLoading ? 'Memuat...' : 'Rp 0'}
-              </p>
-              <p className="text-sm text-ink/50 mt-1">
-                {summary?.belum_tagih ?? 0} invoice jatuh tempo hari ini / terlambat
-              </p>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardContent className="p-4 sm:p-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Total Belum Tertagih - Hero */}
+              <div className="lg:col-span-2 border-r border-border-hairline lg:border-r-0 lg:border-b sm:pr-6 lg:pr-0 lg:pb-6">
+                <p className="text-sm text-ink/60 mb-1">Total belum tertagih</p>
+                <p className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-status-overdue">
+                  {summary ? formatCurrency(summary.total_belum) : isLoading ? 'Memuat...' : 'Rp 0'}
+                </p>
+                <p className="text-sm text-ink/50 mt-1">
+                  {summary?.belum_tagih ?? 0} invoice jatuh tempo hari ini / terlambat
+                </p>
+              </div>
 
-          {/* Tertagih */}
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <p className="text-sm text-ink/60 mb-1">Sudah ditagih hari ini</p>
-              <p className="font-serif text-2xl font-bold text-ink">{summary?.tertangih ?? 0}</p>
-              <p className="text-xs text-ink/50">invoice</p>
-            </CardContent>
-          </Card>
+              {/* Tertagih */}
+              <div className="border-r border-border-hairline lg:border-r-0 lg:border-b sm:px-4 lg:px-0 lg:py-4 lg:first:pt-0">
+                <p className="text-sm text-ink/60 mb-1">Sudah ditagih hari ini</p>
+                <p className="font-serif text-2xl font-bold text-ink">{summary?.tertangih ?? 0}</p>
+                <p className="text-xs text-ink/50">invoice</p>
+              </div>
 
-          {/* Lunas */}
-          <Card>
-            <CardContent className="p-4 sm:p-6">
-              <p className="text-sm text-ink/60 mb-1">Lunas</p>
-              <p className="font-serif text-2xl font-bold text-status-paid">{summary?.lunas ?? 0}</p>
-              <p className="text-xs text-ink/50">invoice</p>
-            </CardContent>
-          </Card>
-        </div>
+              {/* Lunas */}
+              <div className="sm:px-4 lg:px-0 lg:py-4 lg:first:pt-0">
+                <p className="text-sm text-ink/60 mb-1">Lunas</p>
+                <p className="font-serif text-2xl font-bold text-status-paid">{summary?.lunas ?? 0}</p>
+                <p className="text-xs text-ink/50">invoice</p>
+              </div>
+            </div>
 
-        {/* Garis Perforasi */}
-        <div className="my-6 border-t border-dashed border-border-hairline" aria-hidden="true" />
+            {/* Garis Perforasi */}
+            <div className="my-4 border-t border-dashed border-border-hairline" aria-hidden="true" />
+
+            {/* Status counts row */}
+            <div className="flex flex-wrap gap-4 text-sm text-ink/70">
+              <span className="font-medium">Terlambat: <span className="text-status-overdue font-semibold">{summary?.terlambat ?? 0}</span></span>
+              <span className="font-medium">Belum bayar: <span className="text-ink/70 font-semibold">{summary?.belum_bayar ?? 0}</span></span>
+              <span className="font-medium">Lunas: <span className="text-status-paid font-semibold">{summary?.lunas ?? 0}</span></span>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Detail Cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

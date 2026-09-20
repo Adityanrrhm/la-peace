@@ -68,7 +68,7 @@ export default function InvoiceFormPage() {
 
   return (
     <DashboardLayout>
-      <main className="max-w-2xl mx-auto px-4 py-6">
+      <main className="px-4 py-6">
         <Card>
           <CardContent className="p-4 sm:p-6">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
