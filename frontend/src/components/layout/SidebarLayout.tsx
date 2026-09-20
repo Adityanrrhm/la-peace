@@ -21,7 +21,6 @@ import { LayoutDashboard, Users, FileText, Settings, CreditCard, ClipboardList }
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Invoice Piutang', href: '/', icon: FileText },
   { name: 'Customer', href: '/customers', icon: Users },
   { name: 'Ringkasan', href: '/summary', icon: ClipboardList },
 ];
