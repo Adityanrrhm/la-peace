@@ -92,16 +92,21 @@ export default function ChatPage() {
         </Card>
 
         {/* Input */}
-        <div className="flex gap-2">
+        <div className="w-1/2 mx-auto relative">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
             placeholder="Ketik pesan..."
-            className="flex-1 px-4 py-2.5 rounded-xl border border-border-hairline bg-bg-base text-ink text-sm placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-accent-stamp/30"
+            className="w-full px-4 py-2.5 pr-12 rounded-xl border border-border-hairline bg-bg-base text-ink text-sm placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-accent-stamp/30"
           />
-          <Button onClick={handleSend} disabled={!input.trim()} size="icon">
+          <Button
+            onClick={handleSend}
+            disabled={!input.trim()}
+            size="icon"
+            className="absolute right-1 top-1/2 -translate-y-1/2 size-8"
+          >
             <Send className="size-4" />
           </Button>
         </div>
