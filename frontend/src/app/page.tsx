@@ -301,7 +301,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Pagination & Info */}
-            <div className="px-4 py-3 border-t border-border-hairline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="mt-4 px-4 py-3 border border-border-hairline rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <p className="text-sm text-ink/60">
                 Menampilkan {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, totalItems)} dari {totalItems} invoice
               </p>
