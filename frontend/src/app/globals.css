@@ -236,6 +236,11 @@
   --sidebar-ring: #5A5751;
 }
 
+* {
+    -ms-overflow-style: none;  
+    scrollbar-width: none;     
+}
+
 @layer base {
   html {
     font-family: var(--font-sans);
