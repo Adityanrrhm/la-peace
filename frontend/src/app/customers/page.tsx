@@ -133,7 +133,7 @@ export default function CustomersPage() {
                       <tr
                         key={customer.id}
                         className="hover:bg-ink/[0.02] transition-colors cursor-pointer"
-                        onClick={() => window.location.href = `/customers/${customer.id}`}
+                        onClick={() => router.push(`/customers/${customer.id}`)}
                       >
                         <td className="px-4 py-3 font-medium text-ink">{customer.nama}</td>
                         <td className="px-4 py-3 text-ink/70">{customer.kontak_telegram || <span className="text-ink/40">—</span>}</td>

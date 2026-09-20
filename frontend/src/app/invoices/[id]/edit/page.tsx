@@ -76,26 +76,20 @@ export default function InvoiceEditPage() {
     }
   };
 
-  if (invoiceLoading) {
-    return (
-      <div className="min-h-screen bg-bg-base flex items-center justify-center">
-        <div className="animate-pulse text-ink/50">Memuat invoice...</div>
-      </div>
-    );
-  }
-
   if (!invoice) {
     return (
-      <div className="min-h-screen bg-bg-base flex items-center justify-center px-4">
-        <Card>
-          <CardContent className="p-6 text-center">
-            <h2 className="font-serif text-xl font-bold text-ink mb-2">Invoice tidak ditemukan</h2>
-            <Link href="/">
-              <Button>Kembali ke Dashboard</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+      <DashboardLayout>
+        <main className="px-4 py-6">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <h2 className="font-serif text-xl font-bold text-ink mb-2">Invoice tidak ditemukan</h2>
+              <Link href="/">
+                <Button>Kembali ke Dashboard</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </main>
+      </DashboardLayout>
     );
   }
 

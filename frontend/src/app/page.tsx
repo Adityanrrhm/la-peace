@@ -214,7 +214,7 @@ export default function DashboardPage() {
                       <tr
                         key={invoice.id}
                         className="hover:bg-ink/[0.02] transition-colors cursor-pointer"
-                        onClick={() => window.location.href = `/invoices/${invoice.id}`}
+                        onClick={() => router.push(`/invoices/${invoice.id}`)}
                       >
                         <td className="px-4 py-3 font-medium text-ink">{invoice.customer_name}</td>
                         <td className="px-4 py-3 text-right font-serif text-ink">{formatCurrency(invoice.jumlah)}</td>
