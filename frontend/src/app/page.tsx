@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import { Button, Card, CardContent, CardHeader, Label, Stempel, TableHeader } from '@/components/ui';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { formatCurrency, formatDateShort, getStatusLabel, getStatusColor } from '@/lib/utils';
@@ -90,9 +91,13 @@ export default function DashboardPage() {
                 {/* Total Belum Tertagih - Hero */}
                 <div className="lg:col-span-2 border-r border-border-hairline lg:border-r-0 lg:border-b sm:pr-6 lg:pr-0 lg:pb-6">
                   <p className="text-sm text-ink/60 mb-1">Total belum tertagih</p>
-                  <p className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-status-overdue">
-                    {summary ? formatCurrency(summary.total_belum) : 'Rp 0'}
-                  </p>
+                  {summaryLoading ? (
+                    <Skeleton className="h-10 w-48 mb-1" />
+                  ) : (
+                    <p className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-status-overdue">
+                      {formatCurrency(summary.total_belum)}
+                    </p>
+                  )}
                   <p className="text-sm text-ink/50 mt-1">
                     {summary?.belum_tagih ?? 0} invoice jatuh tempo hari ini / terlambat
                   </p>
@@ -101,14 +106,22 @@ export default function DashboardPage() {
                 {/* Tertagih */}
                 <div className="border-r border-border-hairline lg:border-r-0 lg:border-b sm:px-4 lg:px-0 lg:py-4 lg:first:pt-0">
                   <p className="text-sm text-ink/60 mb-1">Sudah ditagih hari ini</p>
-                  <p className="font-serif text-2xl font-bold text-ink">{summary?.tertangih ?? 0}</p>
+                  {summaryLoading ? (
+                    <Skeleton className="h-8 w-16 mb-1" />
+                  ) : (
+                    <p className="font-serif text-2xl font-bold text-ink">{summary.tertangih}</p>
+                  )}
                   <p className="text-xs text-ink/50">invoice</p>
                 </div>
 
                 {/* Lunas */}
                 <div className="sm:px-4 lg:px-0 lg:py-4 lg:first:pt-0">
                   <p className="text-sm text-ink/60 mb-1">Lunas</p>
-                  <p className="font-serif text-2xl font-bold text-status-paid">{summary?.lunas ?? 0}</p>
+                  {summaryLoading ? (
+                    <Skeleton className="h-8 w-16 mb-1" />
+                  ) : (
+                    <p className="font-serif text-2xl font-bold text-status-paid">{summary.lunas}</p>
+                  )}
                   <p className="text-xs text-ink/50">invoice</p>
                 </div>
               </div>
@@ -199,11 +212,15 @@ export default function DashboardPage() {
                 </thead>
                 <tbody>
                   {invoicesLoading ? (
-                    <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-ink/50">
-                        Memuat invoice...
-                      </td>
-                    </tr>
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i}>
+                        <td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td>
+                        <td className="px-4 py-3 text-right"><Skeleton className="h-4 w-24 ml-auto" /></td>
+                        <td className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                        <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
+                        <td className="px-4 py-3"><Skeleton className="h-4 w-14" /></td>
+                      </tr>
+                    ))
                   ) : invoices.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-4 py-8 text-center text-ink/50">

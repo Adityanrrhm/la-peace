@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Card, CardContent, CardHeader, Stempel } from '@/components/ui';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 import { useDailySummary } from '@/hooks/useApi';
@@ -24,9 +25,13 @@ export default function SummaryPage() {
               {/* Total Belum Tertagih - Hero */}
               <div className="lg:col-span-2 border-r border-border-hairline lg:border-r-0 lg:border-b sm:pr-6 lg:pr-0 lg:pb-6">
                 <p className="text-sm text-ink/60 mb-1">Total belum tertagih</p>
-                <p className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-status-overdue">
-                  {summary ? formatCurrency(summary.total_belum) : isLoading ? 'Memuat...' : 'Rp 0'}
-                </p>
+                {isLoading ? (
+                  <Skeleton className="h-10 w-48 mb-1" />
+                ) : (
+                  <p className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-status-overdue">
+                    {formatCurrency(summary.total_belum)}
+                  </p>
+                )}
                 <p className="text-sm text-ink/50 mt-1">
                   {summary?.belum_tagih ?? 0} invoice jatuh tempo hari ini / terlambat
                 </p>
@@ -35,14 +40,22 @@ export default function SummaryPage() {
               {/* Tertagih */}
               <div className="border-r border-border-hairline lg:border-r-0 lg:border-b sm:px-4 lg:px-0 lg:py-4 lg:first:pt-0">
                 <p className="text-sm text-ink/60 mb-1">Sudah ditagih hari ini</p>
-                <p className="font-serif text-2xl font-bold text-ink">{summary?.tertangih ?? 0}</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16 mb-1" />
+                ) : (
+                  <p className="font-serif text-2xl font-bold text-ink">{summary.tertangih}</p>
+                )}
                 <p className="text-xs text-ink/50">invoice</p>
               </div>
 
               {/* Lunas */}
               <div className="sm:px-4 lg:px-0 lg:py-4 lg:first:pt-0">
                 <p className="text-sm text-ink/60 mb-1">Lunas</p>
-                <p className="font-serif text-2xl font-bold text-status-paid">{summary?.lunas ?? 0}</p>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-16 mb-1" />
+                ) : (
+                  <p className="font-serif text-2xl font-bold text-status-paid">{summary.lunas}</p>
+                )}
                 <p className="text-xs text-ink/50">invoice</p>
               </div>
             </div>
@@ -66,13 +79,21 @@ export default function SummaryPage() {
               <h3 className="font-serif text-base font-semibold text-ink">Terlambat</h3>
             </CardHeader>
             <CardContent>
-              <p className="font-serif text-3xl font-bold text-status-overdue">
-                {summary?.terlambat ?? 0}
-              </p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16 mb-1" />
+              ) : (
+                <p className="font-serif text-3xl font-bold text-status-overdue">
+                  {summary.terlambat}
+                </p>
+              )}
               <p className="text-sm text-ink/50 mt-1">invoice</p>
-              <p className="font-serif text-lg font-bold text-status-overdue mt-2">
-                {summary ? formatCurrency(summary.total_terlambat) : 'Rp 0'}
-              </p>
+              {isLoading ? (
+                <Skeleton className="h-6 w-32 mt-2" />
+              ) : (
+                <p className="font-serif text-lg font-bold text-status-overdue mt-2">
+                  {formatCurrency(summary.total_terlambat)}
+                </p>
+              )}
               <p className="text-xs text-ink/50">total nominal</p>
             </CardContent>
           </Card>
@@ -82,9 +103,13 @@ export default function SummaryPage() {
               <h3 className="font-serif text-base font-semibold text-ink">Belum Bayar</h3>
             </CardHeader>
             <CardContent>
-              <p className="font-serif text-3xl font-bold text-ink/70">
-                {summary?.belum_tagih ?? 0}
-              </p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16 mb-1" />
+              ) : (
+                <p className="font-serif text-3xl font-bold text-ink/70">
+                  {summary.belum_tagih}
+                </p>
+              )}
               <p className="text-sm text-ink/50 mt-1">invoice</p>
             </CardContent>
           </Card>
@@ -94,9 +119,13 @@ export default function SummaryPage() {
               <h3 className="font-serif text-base font-semibold text-ink">Lunas</h3>
             </CardHeader>
             <CardContent>
-              <p className="font-serif text-3xl font-bold text-status-paid">
-                {summary?.lunas ?? 0}
-              </p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-16 mb-1" />
+              ) : (
+                <p className="font-serif text-3xl font-bold text-status-paid">
+                  {summary.lunas}
+                </p>
+              )}
               <p className="text-sm text-ink/50 mt-1">invoice</p>
             </CardContent>
           </Card>
@@ -106,9 +135,13 @@ export default function SummaryPage() {
               <h3 className="font-serif text-base font-semibold text-ink">Total Semua Invoice</h3>
             </CardHeader>
             <CardContent>
-              <p className="font-serif text-3xl font-bold text-ink">
-                {summary ? formatCurrency(summary.total_jumlah) : 'Rp 0'}
-              </p>
+              {isLoading ? (
+                <Skeleton className="h-8 w-32 mb-1" />
+              ) : (
+                <p className="font-serif text-3xl font-bold text-ink">
+                  {formatCurrency(summary.total_jumlah)}
+                </p>
+              )}
               <p className="text-sm text-ink/50 mt-1">total nominal</p>
             </CardContent>
           </Card>

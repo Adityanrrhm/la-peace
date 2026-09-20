@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import { Button, Card, CardContent, CardHeader, Label, Stempel, TableHeader } from '@/components/ui';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
@@ -118,11 +119,13 @@ export default function CustomersPage() {
                 </thead>
                 <tbody>
                   {customersLoading ? (
-                    <tr>
-                      <td colSpan={3} className="px-4 py-8 text-center text-ink/50">
-                        Memuat customer...
-                      </td>
-                    </tr>
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i}>
+                        <td className="px-4 py-3"><Skeleton className="h-4 w-36" /></td>
+                        <td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td>
+                        <td className="px-4 py-3"><Skeleton className="h-4 w-14" /></td>
+                      </tr>
+                    ))
                   ) : customers.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="px-4 py-8 text-center text-ink/50">
