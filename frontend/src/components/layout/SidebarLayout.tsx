@@ -15,7 +15,7 @@ import {
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect, useMemo } from 'react';
-import { LayoutDashboard, Users, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Users, ClipboardList, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 
@@ -23,6 +23,7 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Customer', href: '/customers', icon: Users },
   { name: 'Ringkasan', href: '/summary', icon: ClipboardList },
+  { name: 'Chat AI', href: '/chat', icon: MessageSquare },
 ];
 
 export function SidebarLayout({ children }: { children: React.ReactNode }) {
@@ -56,6 +57,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
       customers: 'Customer',
       summary: 'Ringkasan',
       invoices: 'Invoice',
+      chat: 'Chat AI',
       new: 'Baru',
       edit: 'Edit',
     };
