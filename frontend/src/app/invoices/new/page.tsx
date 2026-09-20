@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useCustomers, useCreateInvoice } from '@/hooks/useApi';
 import { formatCurrency } from '@/lib/utils';
 import { Button, Card, CardContent, CardHeader, Label, Input, Select, SelectItem, useToast } from '@/components/ui';
+import { AppHeader } from '@/components/layout/AppHeader';
 
 const invoiceSchema = z.object({
   customer_id: z.string().uuid('Pilih customer yang valid'),
@@ -67,18 +68,7 @@ export default function InvoiceFormPage() {
 
   return (
     <div className="min-h-screen bg-bg-base">
-      <header className="border-b border-border-hairline bg-white sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-accent-stamp hover:underline text-sm">
-              ← Kembali
-            </Link>
-            <h1 className="font-serif text-xl font-bold text-ink">
-              Tambah Invoice Baru
-            </h1>
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Tambah Invoice Baru" showBackLink backHref="/" backLabel="Kembali" />
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <Card>

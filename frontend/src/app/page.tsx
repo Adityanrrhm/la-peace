@@ -1,38 +1,18 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { Button, Card, CardContent, CardHeader, Label, Stempel, TableHeader } from '@/components/ui';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { formatCurrency, formatDateShort, getStatusLabel, getStatusColor } from '@/lib/utils';
 import Link from 'next/link';
 import { useInvoices, useDailySummary } from '@/hooks/useApi';
+import { AppHeader } from '@/components/layout/AppHeader';
 import type { SortDirection } from '@/types/api';
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const apply = (dark: boolean) => {
-      setIsDark(dark);
-      document.documentElement.classList.toggle('dark', dark);
-    };
-    apply(mq.matches);
-    const handler = (e: MediaQueryListEvent) => apply(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-
-  const toggleTheme = () => {
-    const next = !isDark;
-    setIsDark(next);
-    document.documentElement.classList.toggle('dark', next);
-  };
 
   // Parse URL params
   const status = searchParams.get('status') || '';
@@ -100,42 +80,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-bg-base">
-      {/* Header */}
-      <header className="border-b border-border-hairline bg-bg-base sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="font-serif text-xl font-bold text-ink">Tagira</h1>
-            <span className="hidden sm:inline text-sm text-ink/50">Dashboard Piutang</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-ink/70 hidden md:block">{user?.email}</span>
-            <button
-              onClick={toggleTheme}
-              className="p-2 text-ink/40 hover:text-ink/70 transition-colors cursor-pointer"
-              aria-label={isDark ? 'Mode terang' : 'Mode gelap'}
-            >
-              {isDark ? (
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="4"/>
-                  <path d="M12 2v2"/>
-                  <path d="M12 20v2"/>
-                  <path d="m4.93 4.93 1.41 1.41"/>
-                  <path d="m17.66 17.66 1.41 1.41"/>
-                  <path d="M2 12h2"/>
-                  <path d="M20 12h2"/>
-                  <path d="m6.34 17.66-1.41 1.41"/>
-                  <path d="m19.07 4.93-1.41 1.41"/>
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-                </svg>
-              )}
-            </button>
-            <Button variant="ghost" size="sm" onClick={logout}>Keluar</Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Tagira" subtitle="Dashboard Piutang" />
 
       <main className="max-w-6xl mx-auto px-4 py-6">
         {/* Ringkasan Harian */}

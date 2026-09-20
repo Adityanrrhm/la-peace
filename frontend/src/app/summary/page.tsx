@@ -1,32 +1,24 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
 import { Button, Card, CardContent, CardHeader, Stempel } from '@/components/ui';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 import { useDailySummary } from '@/hooks/useApi';
+import { AppHeader } from '@/components/layout/AppHeader';
 
 export default function SummaryPage() {
-  const { user, logout } = useAuth();
   const { data: summary, isLoading, error, refetch } = useDailySummary();
 
   return (
     <div className="min-h-screen bg-bg-base">
-      <header className="border-b border-border-hairline bg-white sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-accent-stamp hover:underline text-sm">
-              ← Kembali ke Dashboard
-            </Link>
-            <h1 className="font-serif text-xl font-bold text-ink">Ringkasan Harian</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-ink/70 hidden md:block">{user?.email}</span>
-            <Button variant="ghost" size="sm" onClick={() => refetch()}>Refresh</Button>
-            <Button variant="ghost" size="sm" onClick={logout}>Keluar</Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        title="Ringkasan Harian"
+        showBackLink
+        backHref="/"
+        backLabel="Kembali ke Dashboard"
+      >
+        <Button variant="ghost" size="sm" onClick={() => refetch()}>Refresh</Button>
+      </AppHeader>
 
       <main className="max-w-4xl mx-auto px-4 py-6">
         {error && (

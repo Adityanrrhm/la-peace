@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useCustomer, useUpdateCustomer } from '@/hooks/useApi';
 import { formatCurrency } from '@/lib/utils';
 import { Button, Card, CardContent, CardHeader, Label, Input, Stempel, useToast } from '@/components/ui';
+import { AppHeader } from '@/components/layout/AppHeader';
 
 const customerSchema = z.object({
   nama: z.string().min(1, 'Nama harus diisi').max(255, 'Nama maksimal 255 karakter'),
@@ -95,16 +96,7 @@ export default function CustomerDetailPage() {
 
   return (
     <div className="min-h-screen bg-bg-base">
-      <header className="border-b border-border-hairline bg-white sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/customers" className="text-accent-stamp hover:underline text-sm">
-              ← Kembali
-            </Link>
-            <h1 className="font-serif text-xl font-bold text-ink">Detail Customer</h1>
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Detail Customer" showBackLink backHref="/customers" backLabel="Kembali" />
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <Card>

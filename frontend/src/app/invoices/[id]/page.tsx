@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useInvoice, useUpdateInvoiceStatus, useFollowUpLogsByInvoice, useCreateFollowUpLog } from '@/hooks/useApi';
 import { formatCurrency, formatDateShort, getStatusLabel, getStatusColor } from '@/lib/utils';
 import { Button, Card, CardContent, CardHeader, Label, Stempel, Textarea, ConfirmDialog, useToast } from '@/components/ui';
+import { AppHeader } from '@/components/layout/AppHeader';
 
 const followUpSchema = z.object({
   isi_pesan: z.string().min(1, 'Isi pesan harus diisi').max(1000, 'Maksimal 1000 karakter'),
@@ -99,23 +100,19 @@ export default function InvoiceDetailPage() {
 
   return (
     <div className="min-h-screen bg-bg-base">
-      {/* Header */}
-      <header className="border-b border-border-hairline bg-white sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-accent-stamp hover:underline text-sm">
-              ← Kembali
-            </Link>
-            <h1 className="font-serif text-xl font-bold text-ink">Invoice #{id.slice(0, 8)}</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className={cn('font-medium', getStatusColor(invoice.status))}>
-              {getStatusLabel(invoice.status, invoice.jatuh_tempo)}
-            </span>
-            {isPaid && <Stempel />}
-          </div>
+      <AppHeader
+        title={`Invoice #${id.slice(0, 8)}`}
+        showBackLink
+        backHref="/"
+        backLabel="Kembali"
+      >
+        <div className="flex items-center gap-3">
+          <span className={cn('font-medium', getStatusColor(invoice.status))}>
+            {getStatusLabel(invoice.status, invoice.jatuh_tempo)}
+          </span>
+          {isPaid && <Stempel />}
         </div>
-      </header>
+      </AppHeader>
 
       <main className="max-w-4xl mx-auto px-4 py-6">
         {/* Info Grid */}

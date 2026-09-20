@@ -8,6 +8,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { useCustomers, useInvoice, useUpdateInvoice } from '@/hooks/useApi';
 import { Button, Card, CardContent, Label, Input, Select, SelectItem, useToast } from '@/components/ui';
+import { AppHeader } from '@/components/layout/AppHeader';
 
 const invoiceSchema = z.object({
   customer_id: z.string().uuid('Pilih customer yang valid'),
@@ -102,16 +103,7 @@ export default function InvoiceEditPage() {
 
   return (
     <div className="min-h-screen bg-bg-base">
-      <header className="border-b border-border-hairline bg-white sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href={`/invoices/${id}`} className="text-accent-stamp hover:underline text-sm">
-              ← Kembali
-            </Link>
-            <h1 className="font-serif text-xl font-bold text-ink">Edit Invoice</h1>
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Edit Invoice" showBackLink backHref={`/invoices/${id}`} backLabel="Kembali" />
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <Card>

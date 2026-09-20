@@ -1,15 +1,14 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
-import { Button, Card, CardContent, CardHeader, Label, Stempel, Select, TableHeader } from '@/components/ui';
+import { Button, Card, CardContent, CardHeader, Label, Stempel, TableHeader } from '@/components/ui';
 import { formatCurrency, formatDateShort } from '@/lib/utils';
 import Link from 'next/link';
 import { useCustomers } from '@/hooks/useApi';
+import { AppHeader } from '@/components/layout/AppHeader';
 
 export default function CustomersPage() {
-  const { user, logout } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -59,18 +58,7 @@ export default function CustomersPage() {
 
   return (
     <div className="min-h-screen bg-bg-base">
-      <header className="border-b border-border-hairline bg-white sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="font-serif text-xl font-bold text-ink">Tagira</h1>
-            <span className="hidden sm:inline text-sm text-ink/50">Daftar Customer</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-ink/70 hidden md:block">{user?.email}</span>
-            <Button variant="ghost" size="sm" onClick={logout}>Keluar</Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader title="Tagira" subtitle="Daftar Customer" />
 
       <main className="max-w-4xl mx-auto px-4 py-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
