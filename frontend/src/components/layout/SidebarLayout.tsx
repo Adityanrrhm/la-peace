@@ -83,14 +83,13 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
             {navigation.map((item) => (
               <SidebarMenuItem key={item.name}>
                 <SidebarMenuButton
-                  asChild
+                  render={<Link href={item.href} />}
                   isActive={pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))}
                   tooltip={item.name}
+                  className="flex w-full items-center gap-2"
                 >
-                  <Link href={item.href} className="flex w-full items-center gap-2">
                     <item.icon className="size-4" />
                     <span>{item.name}</span>
-                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
