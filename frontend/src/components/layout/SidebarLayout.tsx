@@ -33,7 +33,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <Link href="/" className="flex items-center gap-2 px-2 py-1 text-xl font-bold font-serif text-sidebar-foreground">
+          <Link href="/" className="flex items-center gap-2 px-2 py-1 text-xl font-serif text-sidebar-foreground">
             Tagira
           </Link>
         </SidebarHeader>
