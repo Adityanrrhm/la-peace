@@ -4,10 +4,12 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import { Button, Card, CardContent, CardHeader, Label, Stempel, TableHeader } from '@/components/ui';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { formatCurrency, formatDateShort } from '@/lib/utils';
 import Link from 'next/link';
 import { useCustomers } from '@/hooks/useApi';
 import { AppHeader } from '@/components/layout/AppHeader';
+import { SearchIcon } from 'lucide-react';
 
 export default function CustomersPage() {
   const searchParams = useSearchParams();
@@ -75,16 +77,18 @@ export default function CustomersPage() {
             <Link href="/customers/new">
               <Button size="sm">+ Tambah Customer</Button>
             </Link>
-            <div className="relative">
-              <input
+            <InputGroup className="w-64">
+              <InputGroupAddon align="inline-start">
+                <SearchIcon className="size-4 text-ink/40" aria-hidden="true" />
+              </InputGroupAddon>
+              <InputGroupInput
                 type="search"
                 placeholder="Cari nama customer..."
                 value={search}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-64 px-3 py-2 text-sm font-sans text-ink bg-white border border-border-hairline focus:outline-none focus:ring-2 focus:ring-accent-stamp/30 focus:border-accent-stamp rounded"
                 aria-label="Cari customer"
               />
-            </div>
+            </InputGroup>
             <Select value={String(pageSize)} onValueChange={(v) => handlePageSizeChange(parseInt(v, 10))}>
               <SelectTrigger className="w-auto min-w-[100px]" aria-label="Item per halaman">
                 <SelectValue placeholder={`${pageSize} per halaman`} />
