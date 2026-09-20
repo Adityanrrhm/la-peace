@@ -247,7 +247,7 @@ export default function DashboardPage() {
             {/* Pagination & Info */}
             <div className="mt-4 px-4 py-3 border border-border-hairline rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <p className="text-sm text-ink/60 whitespace-nowrap">
-                Menampilkan {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, totalItems)} dari {totalItems} invoice
+                Menampilkan {totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1}–{totalItems === 0 ? 0 : Math.min(currentPage * pageSize, totalItems)} dari {totalItems} invoice
               </p>
               <Pagination className="justify-end">
                 <PaginationContent>

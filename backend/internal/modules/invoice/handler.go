@@ -59,7 +59,12 @@ func (h *InvoiceHandler) List(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, resp, nil)
+	response.Success(c, resp, &response.Meta{
+		Page:       resp.Meta.Page,
+		PageSize:   resp.Meta.PageSize,
+		TotalItems: resp.Meta.TotalItems,
+		TotalPages: resp.Meta.TotalPages,
+	})
 }
 
 func (h *InvoiceHandler) Update(c *gin.Context) {
