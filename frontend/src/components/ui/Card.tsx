@@ -3,12 +3,17 @@
 import { forwardRef, type HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }, ref) => {
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  variant?: 'default' | 'table';
+}
+
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ className, children, variant = 'default', ...props }, ref) => {
     return (
       <div
         className={cn(
-          'bg-white dark:bg-ink/5 border border-border-hairline',
+
+          variant === 'default' && 'border border-border-hairline',
           className
         )}
         ref={ref}

@@ -233,11 +233,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <Card>
+          <Card variant="table">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm table-fixed" role="table">
+              <table className="w-full text-sm table-fixed rounded-table" role="table">
                 <thead>
-                  <tr className="border-b border-border-hairline bg-white/50 dark:bg-ink/5">
+                  <tr className="bg-white/50 dark:bg-ink/5">
                     <TableHeader sortBy="customer_name" currentSortBy={sortBy} currentSortDir={sortDir} onSort={handleSort} align="left">
                       Customer
                     </TableHeader>
@@ -250,7 +250,7 @@ export default function DashboardPage() {
                     <TableHeader sortBy="status" currentSortBy={sortBy} currentSortDir={sortDir} onSort={handleSort} align="left">
                       Status
                     </TableHeader>
-                    <th className="px-4 py-3 text-left font-sans font-medium text-ink/70 border-b border-border-hairline"></th>
+                    <th className="px-4 py-3 text-left font-sans font-medium text-ink/70"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -270,7 +270,7 @@ export default function DashboardPage() {
                     invoices.map((invoice) => (
                       <tr
                         key={invoice.id}
-                        className="border-b border-border-hairline hover:bg-ink/[0.02] transition-colors cursor-pointer"
+                        className="hover:bg-ink/[0.02] transition-colors cursor-pointer"
                         onClick={() => window.location.href = `/invoices/${invoice.id}`}
                       >
                         <td className="px-4 py-3 font-medium text-ink">{invoice.customer_name}</td>
