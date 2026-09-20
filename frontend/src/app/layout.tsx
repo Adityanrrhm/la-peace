@@ -1,13 +1,10 @@
 import type { Metadata } from 'next';
-import { Inter, Fraunces } from 'next/font/google';
+import { Inter, Fraunces, Geist } from 'next/font/google';
 import './globals.css';
 import { ClientProviders } from '@/components/ClientProviders';
+import { cn } from "@/lib/utils";
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
-});
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -22,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${inter.variable} ${fraunces.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="id" className={cn("h-full", "antialiased", fraunces.variable, "font-sans", geist.variable)} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
