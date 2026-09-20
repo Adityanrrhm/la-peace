@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="min-h-screen bg-bg-base font-sans text-ink">
+      <body className="min-h-screen bg-bg-base font-sans text-ink" suppressHydrationWarning>
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
