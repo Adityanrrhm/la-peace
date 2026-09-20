@@ -199,7 +199,17 @@ export default function DashboardPage() {
               </Link>
               <Select value={status} onValueChange={handleStatusChange}>
                 <SelectTrigger className="w-auto min-w-[160px]" aria-label="Filter status">
-                  <SelectValue placeholder="Semua Status" />
+                  <SelectValue>
+                    {() => {
+                      const labels: Record<string, string> = {
+                        "": "Semua Status",
+                        belum_bayar: "Belum Bayar",
+                        lunas: "Lunas",
+                        terlambat: "Terlambat",
+                      };
+                      return labels[status] ?? "Semua Status";
+                    }}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Semua Status</SelectItem>
@@ -210,7 +220,9 @@ export default function DashboardPage() {
               </Select>
               <Select value={String(pageSize)} onValueChange={(v) => handlePageSizeChange(parseInt(v, 10))}>
                 <SelectTrigger className="w-auto min-w-[100px]" aria-label="Item per halaman">
-                  <SelectValue />
+                  <SelectValue>
+                    {() => `${pageSize} per halaman`}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="10">10 per halaman</SelectItem>
