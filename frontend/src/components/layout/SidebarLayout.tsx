@@ -102,7 +102,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarRail />
       <SidebarInset>
-        <header className="border-b border-border-hairline bg-bg-base px-4 py-2 flex items-center justify-end gap-3">
+        <header className="border-b border-border-hairline bg-bg-base/50 backdrop-blur-xl sticky top-0 z-10 px-4 py-2 flex items-center justify-end gap-3">
           <span className="text-sm text-ink/70 hidden md:block">{user?.email}</span>
           <button
             onClick={toggleTheme}
