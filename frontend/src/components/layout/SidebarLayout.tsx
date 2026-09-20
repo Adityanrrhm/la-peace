@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { LayoutDashboard, Users, ClipboardList } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -26,7 +27,26 @@ const navigation = [
 export function SidebarLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const apply = (dark: boolean) => {
+      setIsDark(dark);
+      document.documentElement.classList.toggle('dark', dark);
+    };
+    apply(mq.matches);
+    const handler = (e: MediaQueryListEvent) => apply(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.classList.toggle('dark', next);
+  };
 
   return (
     <SidebarProvider>
@@ -82,6 +102,28 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
       </Sidebar>
       <SidebarRail />
       <SidebarInset>
+        <header className="border-b border-border-hairline bg-bg-base px-4 py-2 flex items-center justify-end gap-3">
+          <span className="text-sm text-ink/70 hidden md:block">{user?.email}</span>
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 text-ink/40 hover:text-ink/70 transition-colors cursor-pointer"
+            aria-label={isDark ? 'Mode terang' : 'Mode gelap'}
+          >
+            {isDark ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2"/><path d="M12 20v2"/>
+                <path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/>
+                <path d="M2 12h2"/><path d="M20 12h2"/>
+                <path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+              </svg>
+            )}
+          </button>
+        </header>
         {children}
       </SidebarInset>
     </SidebarProvider>
