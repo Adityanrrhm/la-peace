@@ -98,45 +98,43 @@ export default function CustomersPage() {
           </div>
         </div>
 
-        <Card>
+        <Card variant="table">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm" role="table">
+            <table className="w-full text-sm table-fixed border-separate border-spacing-0 rounded-table" role="table">
               <thead>
-                <tr className="border-b border-border-hairline bg-white/50">
+                <tr className="bg-white/50 dark:bg-ink/5">
                   <TableHeader sortBy="nama" currentSortBy="" currentSortDir="desc" onSort={() => {}} align="left">
                     Nama
                   </TableHeader>
                   <TableHeader sortBy="kontak_telegram" currentSortBy="" currentSortDir="desc" onSort={() => {}} align="left">
                     Kontak Telegram
                   </TableHeader>
-                  <th className="px-4 py-3 text-left font-sans font-medium text-ink/70 w-32 border-b border-border-hairline bg-white/50"></th>
+                  <th className="px-4 py-3 text-left font-sans font-medium text-ink/70"></th>
                 </tr>
               </thead>
               <tbody>
                 {customersLoading ? (
                   <tr>
-                    <td colSpan={3} className="px-4 py-8 text-center text-ink/50">
+                    <td colSpan={3} className="px-4 py-8 text-center text-ink/50 rounded-bl-lg rounded-br-lg">
                       Memuat customer...
                     </td>
                   </tr>
                 ) : customers.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="px-4 py-8 text-center text-ink/50">
+                    <td colSpan={3} className="px-4 py-8 text-center text-ink/50 rounded-bl-lg rounded-br-lg">
                       Belum ada customer — <Link href="/customers/new" className="text-accent-stamp hover:underline">tambah customer pertama kamu</Link>
                     </td>
                   </tr>
                 ) : (
-                  customers.map((customer) => (
+                  customers.map((customer, index) => (
                     <tr
                       key={customer.id}
-                      className="border-b border-border-hairline hover:bg-ink/[0.02] transition-colors cursor-pointer"
+                      className="hover:bg-ink/[0.02] transition-colors cursor-pointer"
                       onClick={() => window.location.href = `/customers/${customer.id}`}
                     >
-                      <td className="px-4 py-3 font-medium text-ink">{customer.nama}</td>
-                      <td className="px-4 py-3 text-ink/70">
-                        {customer.kontak_telegram || <span className="text-ink/40">—</span>}
-                      </td>
-                      <td className="px-4 py-3">
+                      <td className={`px-4 py-3 font-medium text-ink ${index === customers.length - 1 ? 'rounded-bl-lg' : ''}`}>{customer.nama}</td>
+                      <td className="px-4 py-3 text-ink/70">{customer.kontak_telegram || <span className="text-ink/40">—</span>}</td>
+                      <td className={`px-4 py-3 ${index === customers.length - 1 ? 'rounded-br-lg' : ''}`}>
                         <Link
                           href={`/customers/${customer.id}`}
                           className="text-sm text-accent-stamp hover:underline"
