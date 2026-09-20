@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { useCustomers, useCreateInvoice } from '@/hooks/useApi';
 import { formatCurrency } from '@/lib/utils';
 import { Button, Card, CardContent, CardHeader, Label, Input, Select, SelectItem, useToast } from '@/components/ui';
-import { AppHeader } from '@/components/layout/AppHeader';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 const invoiceSchema = z.object({
   customer_id: z.string().uuid('Pilih customer yang valid'),
@@ -67,9 +67,7 @@ export default function InvoiceFormPage() {
   const customers = customersData?.data?.customers ?? [];
 
   return (
-    <div className="min-h-screen bg-bg-base">
-      <AppHeader title="Tambah Invoice Baru" showBackLink backHref="/" backLabel="Kembali" />
-
+    <DashboardLayout>
       <main className="max-w-2xl mx-auto px-4 py-6">
         <Card>
           <CardContent className="p-4 sm:p-6">
@@ -176,6 +174,6 @@ export default function InvoiceFormPage() {
           </CardContent>
         </Card>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }

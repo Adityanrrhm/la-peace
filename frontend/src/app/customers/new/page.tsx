@@ -8,7 +8,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { useCreateCustomer } from '@/hooks/useApi';
 import { Button, Card, CardContent, CardHeader, Label, Input } from '@/components/ui';
-import { AppHeader } from '@/components/layout/AppHeader';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 const customerSchema = z.object({
   nama: z.string().min(1, 'Nama harus diisi').max(255, 'Nama maksimal 255 karakter'),
@@ -56,9 +56,7 @@ export default function CustomerNewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-base">
-      <AppHeader title="Tambah Customer Baru" showBackLink backHref="/customers" backLabel="Kembali" />
-
+    <DashboardLayout>
       <main className="max-w-2xl mx-auto px-4 py-6">
         <Card>
           <CardContent className="p-4 sm:p-6">
@@ -142,6 +140,6 @@ export default function CustomerNewPage() {
           </CardContent>
         </Card>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }

@@ -7,7 +7,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { formatCurrency, formatDateShort, getStatusLabel, getStatusColor } from '@/lib/utils';
 import Link from 'next/link';
 import { useInvoices, useDailySummary } from '@/hooks/useApi';
-import { AppHeader } from '@/components/layout/AppHeader';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import type { SortDirection } from '@/types/api';
 
 export default function DashboardPage() {
@@ -79,9 +79,7 @@ export default function DashboardPage() {
   const hasActiveFilters = status || sortBy || pageSize !== 20;
 
   return (
-    <div className="min-h-screen bg-bg-base">
-      <AppHeader title="Tagira" subtitle="Dashboard Piutang" />
-
+    <DashboardLayout>
       <main className="max-w-6xl mx-auto px-4 py-6">
         {/* Ringkasan Harian */}
         <section className="mb-6" aria-labelledby="ringkasan-heading">
@@ -275,6 +273,6 @@ export default function DashboardPage() {
           </Card>
         </section>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }

@@ -4,22 +4,13 @@ import { Button, Card, CardContent, CardHeader, Stempel } from '@/components/ui'
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 import { useDailySummary } from '@/hooks/useApi';
-import { AppHeader } from '@/components/layout/AppHeader';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 export default function SummaryPage() {
   const { data: summary, isLoading, error, refetch } = useDailySummary();
 
   return (
-    <div className="min-h-screen bg-bg-base">
-      <AppHeader
-        title="Ringkasan Harian"
-        showBackLink
-        backHref="/"
-        backLabel="Kembali ke Dashboard"
-      >
-        <Button variant="ghost" size="sm" onClick={() => refetch()}>Refresh</Button>
-      </AppHeader>
-
+    <DashboardLayout>
       <main className="max-w-4xl mx-auto px-4 py-6">
         {error && (
           <div className="mb-6 p-4 text-sm text-status-overdue bg-status-overdue/10 border border-status-overdue/20 rounded" role="alert">
@@ -125,6 +116,6 @@ export default function SummaryPage() {
           </Link>
         </div>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }

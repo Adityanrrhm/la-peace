@@ -7,9 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
 import { useInvoice, useUpdateInvoiceStatus, useFollowUpLogsByInvoice, useCreateFollowUpLog } from '@/hooks/useApi';
-import { formatCurrency, formatDateShort, getStatusLabel, getStatusColor } from '@/lib/utils';
+import { cn, formatCurrency, formatDateShort, getStatusLabel, getStatusColor } from '@/lib/utils';
 import { Button, Card, CardContent, CardHeader, Label, Stempel, Textarea, ConfirmDialog, useToast } from '@/components/ui';
-import { AppHeader } from '@/components/layout/AppHeader';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 const followUpSchema = z.object({
   isi_pesan: z.string().min(1, 'Isi pesan harus diisi').max(1000, 'Maksimal 1000 karakter'),
@@ -99,21 +99,7 @@ export default function InvoiceDetailPage() {
   const isOverdueOrDue = invoice.status === 'belum_bayar' || invoice.status === 'terlambat';
 
   return (
-    <div className="min-h-screen bg-bg-base">
-      <AppHeader
-        title={`Invoice #${id.slice(0, 8)}`}
-        showBackLink
-        backHref="/"
-        backLabel="Kembali"
-      >
-        <div className="flex items-center gap-3">
-          <span className={cn('font-medium', getStatusColor(invoice.status))}>
-            {getStatusLabel(invoice.status, invoice.jatuh_tempo)}
-          </span>
-          {isPaid && <Stempel />}
-        </div>
-      </AppHeader>
-
+    <DashboardLayout>
       <main className="max-w-4xl mx-auto px-4 py-6">
         {/* Info Grid */}
         <section className="mb-6" aria-labelledby="info-heading">
@@ -274,8 +260,7 @@ export default function InvoiceDetailPage() {
         variant="primary"
         isLoading={updateStatus.isPending}
       />
-    </div>
+    </DashboardLayout>
   );
 }
 
-import { cn } from '@/lib/utils';

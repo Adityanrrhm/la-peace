@@ -8,7 +8,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { formatCurrency, formatDateShort } from '@/lib/utils';
 import Link from 'next/link';
 import { useCustomers } from '@/hooks/useApi';
-import { AppHeader } from '@/components/layout/AppHeader';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { SearchIcon } from 'lucide-react';
 
 export default function CustomersPage() {
@@ -60,9 +60,7 @@ export default function CustomersPage() {
   const hasActiveFilters = search;
 
   return (
-    <div className="min-h-screen bg-bg-base">
-      <AppHeader title="Tagira" subtitle="Daftar Customer" />
-
+    <DashboardLayout>
       <main className="max-w-4xl mx-auto px-4 py-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
           <div className="flex items-center gap-4">
@@ -182,6 +180,6 @@ export default function CustomersPage() {
           </div>
         </Card>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }
