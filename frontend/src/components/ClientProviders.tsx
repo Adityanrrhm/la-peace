@@ -66,11 +66,7 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, authChecked, pathname, router]);
 
   if (!hydrated || !authChecked) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-base">
-        <div className="animate-pulse text-ink/50">Memuat...</div>
-      </div>
-    );
+    return null;
   }
 
   if (!isAuthenticated && pathname !== '/login') {

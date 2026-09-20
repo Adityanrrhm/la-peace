@@ -74,11 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   if (!isHydrated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-base">
-        <div className="animate-pulse text-ink/50">Memuat...</div>
-      </div>
-    );
+    return null;
   }
 
   return (
