@@ -11,13 +11,11 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
-  SidebarSeparator,
-  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { LayoutDashboard, Users, FileText, Settings, CreditCard, ClipboardList } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { LayoutDashboard, Users, ClipboardList } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -27,6 +25,8 @@ const navigation = [
 
 export function SidebarLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuth();
 
   return (
     <SidebarProvider>
@@ -61,11 +61,20 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Settings">
-                <Link href="/settings" className="flex w-full items-center gap-2">
-                  <Settings className="size-4" />
-                  <span>Settings</span>
-                </Link>
+              <SidebarMenuButton
+                onClick={async () => {
+                  await logout();
+                  router.push('/login');
+                }}
+                tooltip="Keluar"
+                className="text-red-500/80 hover:text-red-500 hover:bg-red-500/10"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4">
+                  <path d="m16 17 5-5-5-5"/>
+                  <path d="M21 12H9"/>
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                </svg>
+                <span>Keluar</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
