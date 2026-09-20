@@ -3,7 +3,8 @@
 import { useAuth } from '@/context/AuthContext';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
-import { Button, Card, CardContent, CardHeader, Label, Stempel, Select, TableHeader } from '@/components/ui';
+import { Button, Card, CardContent, CardHeader, Label, Stempel, TableHeader } from '@/components/ui';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { formatCurrency, formatDateShort, getStatusLabel, getStatusColor } from '@/lib/utils';
 import Link from 'next/link';
 import { useInvoices, useDailySummary } from '@/hooks/useApi';
@@ -196,26 +197,26 @@ export default function DashboardPage() {
               <Link href="/invoices/new">
                 <Button size="sm">+ Tambah Invoice</Button>
               </Link>
-              <Select
-                value={status}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                className="w-auto min-w-[160px]"
-                aria-label="Filter status"
-              >
-                <option value="">Semua Status</option>
-                <option value="belum_bayar">Belum Bayar</option>
-                <option value="lunas">Lunas</option>
-                <option value="terlambat">Terlambat</option>
+              <Select value={status} onValueChange={handleStatusChange}>
+                <SelectTrigger className="w-auto min-w-[160px]" aria-label="Filter status">
+                  <SelectValue placeholder="Semua Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Semua Status</SelectItem>
+                  <SelectItem value="belum_bayar">Belum Bayar</SelectItem>
+                  <SelectItem value="lunas">Lunas</SelectItem>
+                  <SelectItem value="terlambat">Terlambat</SelectItem>
+                </SelectContent>
               </Select>
-              <Select
-                value={pageSize}
-                onChange={(e) => handlePageSizeChange(parseInt(e.target.value, 10))}
-                className="w-auto min-w-[100px]"
-                aria-label="Item per halaman"
-              >
-                <option value={10}>10 per halaman</option>
-                <option value={20}>20 per halaman</option>
-                <option value={50}>50 per halaman</option>
+              <Select value={String(pageSize)} onValueChange={(v) => handlePageSizeChange(parseInt(v, 10))}>
+                <SelectTrigger className="w-auto min-w-[100px]" aria-label="Item per halaman">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10 per halaman</SelectItem>
+                  <SelectItem value="20">20 per halaman</SelectItem>
+                  <SelectItem value="50">50 per halaman</SelectItem>
+                </SelectContent>
               </Select>
             </div>
           </div>
