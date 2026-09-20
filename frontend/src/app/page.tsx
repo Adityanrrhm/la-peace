@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import { Button, Card, CardContent, CardHeader, Label, Stempel, TableHeader } from '@/components/ui';
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { formatCurrency, formatDateShort, getStatusLabel, getStatusColor } from '@/lib/utils';
 import Link from 'next/link';
@@ -245,30 +246,34 @@ export default function DashboardPage() {
 
             {/* Pagination & Info */}
             <div className="mt-4 px-4 py-3 border border-border-hairline rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <p className="text-sm text-ink/60">
+              <p className="text-sm text-ink/60 whitespace-nowrap">
                 Menampilkan {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, totalItems)} dari {totalItems} invoice
               </p>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={currentPage === 1}
-                  onClick={() => handlePageChange(currentPage - 1)}
-                >
-                  Sebelumnya
-                </Button>
-                <span className="text-sm text-ink/70 px-2">
-                  Halaman {currentPage} dari {totalPages || 1}
-                </span>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  onClick={() => handlePageChange(currentPage + 1)}
-                >
-                  Selanjutnya
-                </Button>
-              </div>
+              <Pagination className="justify-end">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      text="Sebelumnya"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      aria-disabled={currentPage === 1}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <span className="text-sm text-ink/70 px-2">
+                      {currentPage} / {totalPages || 1}
+                    </span>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext
+                      text="Selanjutnya"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      aria-disabled={currentPage === totalPages || totalPages === 0}
+                      className={currentPage === totalPages || totalPages === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           </Card>
         </section>
