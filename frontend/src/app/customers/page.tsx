@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useCallback } from 'react';
 import { Button, Card, CardContent, CardHeader, Label, Stempel, TableHeader } from '@/components/ui';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { formatCurrency, formatDateShort } from '@/lib/utils';
 import Link from 'next/link';
 import { useCustomers } from '@/hooks/useApi';
@@ -84,15 +85,15 @@ export default function CustomersPage() {
                 aria-label="Cari customer"
               />
             </div>
-            <Select
-              value={pageSize}
-              onChange={(e) => handlePageSizeChange(parseInt(e.target.value, 10))}
-              className="w-auto min-w-[100px]"
-              aria-label="Item per halaman"
-            >
-              <option value={10}>10 per halaman</option>
-              <option value={20}>20 per halaman</option>
-              <option value={50}>50 per halaman</option>
+            <Select value={String(pageSize)} onValueChange={(v) => handlePageSizeChange(parseInt(v, 10))}>
+              <SelectTrigger className="w-auto min-w-[100px]" aria-label="Item per halaman">
+                <SelectValue placeholder={`${pageSize} per halaman`} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10 per halaman</SelectItem>
+                <SelectItem value="20">20 per halaman</SelectItem>
+                <SelectItem value="50">50 per halaman</SelectItem>
+              </SelectContent>
             </Select>
           </div>
         </div>
